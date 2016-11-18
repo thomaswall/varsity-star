@@ -49,7 +49,8 @@
       var scene, camera, renderer;
       var geometry, material;
       var meshes = [];
-
+	  var angle = Math.PI / 2;
+	  var lags = [];
       init();
       animate();
 
@@ -58,13 +59,17 @@
         scene = new THREE.Scene();
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 10000 );
-        camera.position.set( 0, 0, 0 );
+        camera.position.set( 0, 0, 20 );
         //camera.lookAt(new THREE.Vector3(0, 0, 100));
 
 				var particle_num = 100;
 				var positions = new Float32Array( particle_num * 3 );
 				var colors = new Float32Array( particle_num * 3 );
 				var sizes = new Float32Array( particle_num * 3 );
+
+				for(var i = 0; i < particle_num; i ++ ) {
+					lags.push({lag1: Math.random(), lag2: Math.random()});
+				}
 
 
 				var vertex;
@@ -112,25 +117,24 @@
         document.body.appendChild( renderer.domElement );
 
       }
-	  var angle = Math.PI / 2;
       function animate() {
 
-				//particles.rotation.x += 0.0005;
-				//particles.position.y -= 0.2;
-			angle += Math.PI / 32;
-			geometry.attributes.position.array[0] = Math.cos(angle)* 5;
- 			geometry.attributes.position.array[1] = Math.sin(angle) * 5;
+			angle += Math.PI / 128;
+			geometry.attributes.position.array[0] = Math.cos(angle)* 20;
+ 			geometry.attributes.position.array[1] = Math.sin(angle) * 20;
+			var leader = {x: geometry.attributes.position.array[0], y: geometry.attributes.position.array[1]};
+			var time = new Date().getTime() / 1000;
 
 			var j = 1;
-			for(var i = 3; i < geometry.attributes.position.array.length; i += 3) {
-				geometry.attributes.position.array[i] = Math.cos(angle + Math.PI * i / 32) * (5 + j);
-				geometry.attributes.position.array[i + 1] = Math.sin(angle + Math.PI * i / 32) * (5 + j);
-				//geometry.attributes.position.array[i + 2] = Math.cos(angle + Math.PI * i / 32) * (5 + j);
+			for(var i = 3; i < geometry.attributes.position.array.length; i += 3){
+				geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2));
+				geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2));
+
 				j += 1;
 			}
 		  geometry.attributes.position.needsUpdate = true;
 		  //console.log(geometry.attributes.position);
-		  //geometry.attributes.size.needsUpdate = true;
+		  geometry.attributes.size.needsUpdate = true;
 
 
         renderer.render( scene, camera );

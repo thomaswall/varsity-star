@@ -9,24 +9,9 @@ var meshes = [];
 var angle = Math.PI / 2;
 var lags = [];
 
-var PORT = 2346;
-var HOST = '192.168.0.2';
-
-var dgram = require('dgram');
-var server = dgram.createSocket('udp4');
-
-server.on('listening', function () {
-    var address = server.address();
-    console.log('UDP Server listening on ' + address.address + ":" + address.port);
-});
-
-server.on('message', function (message, remote) {
-console.log(remote);
-    console.log(remote.address + ':' + remote.port +' - ' + message);
-
-});
-
-server.bind(PORT, HOST);
+var bass = 0;
+var change = 0;
+var peaked = false;
 
 var vs = ["attribute float size;",
   "attribute vec3 customColor;",
@@ -53,6 +38,15 @@ export default class Viz extends Component {
       super(props);
       this.init();
       this.animate();
+
+      var socket = new WebSocket("ws://127.0.0.1:1337");
+      socket.onmessage = function (event) {
+        //   let new_d = parseInt(event.data);
+        //   if(!isNaN(new_d)) {
+        //       bass = new_d;
+        //   }
+        console.log(event.data);
+      }
   }
 
   init = () => {
@@ -119,6 +113,23 @@ export default class Viz extends Component {
   }
 
   animate = () => {
+    if(bass > 0 && change < bass && !peaked) {
+        change += bass / 100;
+    }
+    else if(change > 0 && change >= bass) {
+        peaked = true;
+        change -= bass / 100;
+    }
+    else if(peaked && change > 0) {
+        change -= bass / 100;
+    }
+    else if(change <= 0 && peaked) {
+        peaked = false;
+        bass = 0;
+        change = 0;
+    }
+
+
     angle += Math.PI / 128;
     geometry.attributes.position.array[0] = Math.cos(angle)* 20;
     geometry.attributes.position.array[1] = Math.sin(angle) * 20;
@@ -127,8 +138,8 @@ export default class Viz extends Component {
 
     var j = 1;
     for(var i = 3; i < geometry.attributes.position.array.length; i += 3){
-      geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2));
-      geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20);// + Math.cos(time * lags[j-1].lag2));
+      geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2) + change);
+      geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20 + change);// + Math.cos(time * lags[j-1].lag2));
 
       j += 1;
     }

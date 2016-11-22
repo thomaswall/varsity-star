@@ -1,5 +1,6 @@
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ port: 1337 });
+var osc = require('osc-min');
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
@@ -10,18 +11,14 @@ wss.on('connection', function connection(ws) {
 });
 
 wss.broadcast = function broadcast(data) {
+  //console.log(data);
   wss.clients.forEach(function each(client) {
     client.send(data);
   });
 };
 
-function bin2String(array) {
-  var result = [];
-  for (var i = 0; i < array.length; i++) {
-    result.push(parseInt(array[i], 2));
-  }
-  return result;
-}
+
+
 
 var PORT = 33333;
 var HOST = '0.0.0.0';
@@ -34,10 +31,17 @@ server.on('listening', function () {
     console.log('UDP Server listening on ' + address.address + ":" + address.port);
 });
 
+var counter = 0;
 server.on('message', function (message, remote) {
-    console.log(bin2String(message))
-    //console.log(remote.address + ':' + remote.port +' - ' + bin2String(message));
-    wss.broadcast(message);
+    //console.log(remote.address + ':' + remote.port +' - ' + message);
+    var buffer = osc.fromBuffer(message);
+    if(buffer.address.indexOf("Note") > -1) {
+      counter += 1;
+      if(counter % 2) {
+        wss.broadcast('' + buffer.args[0].value);
+      }
+    }
+
 });
 
 server.bind(PORT, HOST);

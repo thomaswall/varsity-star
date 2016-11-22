@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import brownstone from './brownstone.jpg'
+import waterNormal from './waternormals.jpg';
+import sky from './sky.png';
 import THREE from 'three'
+import './mirror.js';
+import './water.js';
 
 
 var scene, camera, renderer;
 var geometry, material;
 var meshes = [];
+
+var water;
 
 export default class Viz extends Component {
 
@@ -16,11 +22,10 @@ export default class Viz extends Component {
 
       var socket = new WebSocket("ws://127.0.0.1:1337");
       socket.onmessage = function (event) {
-        //   let new_d = parseInt(event.data);
-        //   if(!isNaN(new_d)) {
-        //       bass = new_d;
-        //   }
-        console.log(event.data);
+          let new_d = parseInt(event.data);
+          if(!isNaN(new_d)) {
+              bass = new_d;
+          }
       }
   }
 
@@ -45,8 +50,10 @@ export default class Viz extends Component {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 10000 );
-    camera.position.set( 0, 0, -4000 );
+    camera.position.set( 0, 0, -70000 );
     //camera.lookAt(new THREE.Vector3(0, 0, -4000));
+    // camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.5, 3000000 );
+		// camera.position.set( 2000, 750, 2000 );
 
     var texture = new THREE.CanvasTexture( this.generateTexture() );
     texture.wrapS = THREE.RepeatWrapping;
@@ -95,6 +102,76 @@ export default class Viz extends Component {
     renderer.sortObjects = false;
     renderer.setSize( window.innerWidth, window.innerHeight );
 
+    //water
+
+    scene.add( new THREE.AmbientLight( 0x444444 ) );
+		var light = new THREE.DirectionalLight( 0xffffbb, 1 );
+		light.position.set( - 1, 1, - 1 );
+		scene.add( light );
+
+    var waterNormals = new THREE.TextureLoader().load( waterNormal );
+		waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+    water = new THREE.Water( renderer, camera, scene, {
+					textureWidth: 512,
+					textureHeight: 512,
+					waterNormals: waterNormals,
+					alpha: 	1.0,
+					sunDirection: light.position.clone().normalize(),
+					sunColor: 0xffffff,
+					waterColor: 0x001e0f,
+					distortionScale: 50.0,
+				} );
+
+    var mirrorMesh = new THREE.Mesh(
+					new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
+					water.material
+				);
+
+    mirrorMesh.position.y = -140;
+    mirrorMesh.position.z = - 80000;
+
+    mirrorMesh.add( water );
+
+		mirrorMesh.rotation.x = - Math.PI * 0.5;
+		scene.add( mirrorMesh );
+
+    var cubeMap = new THREE.CubeTexture( [] );
+		cubeMap.format = THREE.RGBFormat;
+		var loader = new THREE.ImageLoader();
+		loader.load( sky, function ( image ) {
+			var getSide = function ( x, y ) {
+				var size = 1024;
+				var canvas = document.createElement( 'canvas' );
+				canvas.width = size;
+				canvas.height = size;
+				var context = canvas.getContext( '2d' );
+				context.drawImage( image, - x * size, - y * size );
+				return canvas;
+			};
+			cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
+			cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
+			cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
+			cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
+			cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
+			cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
+			cubeMap.needsUpdate = true;
+		} );
+		var cubeShader = THREE.ShaderLib[ 'cube' ];
+		cubeShader.uniforms[ 'tCube' ].value = cubeMap;
+		var skyBoxMaterial = new THREE.ShaderMaterial( {
+			fragmentShader: cubeShader.fragmentShader,
+			vertexShader: cubeShader.vertexShader,
+			uniforms: cubeShader.uniforms,
+			depthWrite: false,
+			side: THREE.BackSide
+		} );
+		var skyBox = new THREE.Mesh(
+			new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
+			skyBoxMaterial
+		);
+		scene.add( skyBox );
+
     document.body.appendChild( renderer.domElement );
 
   }
@@ -102,12 +179,16 @@ export default class Viz extends Component {
   animate = () => {
     requestAnimationFrame( this.animate );
 
-    for(let i = 0; i < 1000; i ++ ) {
-      meshes[i].rotation.x += Math.random()/100;
-      meshes[i].rotation.y += Math.random()/100;
-      meshes[i].rotation.z += Math.random()/100;
-    }
+    // for(let i = 0; i < 1000; i ++ ) {
+    //   meshes[i].rotation.x += Math.random()/100;
+    //   meshes[i].rotation.y += Math.random()/100;
+    //   meshes[i].rotation.z += Math.random()/100;
+    // }
     camera.position.z -= 10;
+
+
+    water.material.uniforms.time.value += 1.0 / 60.0;
+    water.render();
 
 
     renderer.render( scene, camera );

@@ -79,7 +79,7 @@ export default class Viz extends Component {
 
         setTimeout(() => {
             step += 1;
-        }, 10000)
+        }, 2000)
   }
 
   init = () => {
@@ -202,7 +202,7 @@ export default class Viz extends Component {
   }
 
   phase2 = (time) => {
-      var transition = (time - start_time) / 1;
+      var transition = (time - start_time) / 3;
       if(transition > 1) {
           transition = 1;
       }
@@ -211,8 +211,8 @@ export default class Viz extends Component {
       var k = 0;
       for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
 
-        var change = Math.abs(Math.sin(time % Math.PI + k / particle_num * Math.PI));
-        geometry.attributes.position.array[i] = (-35 + (k % (particle_num / 5) * (70 / particle_num * 5)) - last_seen[i]) * transition + last_seen[i];
+        var change = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 3;
+        geometry.attributes.position.array[i] = (-30 + (k % (particle_num / 5) * (60 / particle_num * 5)) - last_seen[i]) * transition + last_seen[i];
         geometry.attributes.position.array[i + 1] = ((-15 + (j - 1) / 4 * 30) - last_seen[i + 1]) * transition + last_seen[i + 1] + change;
         geometry.attributes.position.array[i + 2] = -50;
 

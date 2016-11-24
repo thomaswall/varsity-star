@@ -11,7 +11,8 @@ var meshes = [];
 var angle = Math.PI / 2;
 var lags = [];
 var mesh1;
-var particle_num = 100;
+var fourguys = [];
+var particle_num = 500;
 
 var bass = 0;
 var change = 0;
@@ -22,6 +23,10 @@ var new_pos = [];
 for(var i = 0; i < particle_num * 3; i += 1){
   new_pos.push(0);
 }
+
+var last_seen = new Array(particle_num * 3);
+
+var step = 0;
 
 var vs = ["attribute float size;",
   "attribute vec3 customColor;",
@@ -49,26 +54,32 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-      var socket = new WebSocket("ws://127.0.0.1:1337");
-      socket.onmessage = function (event) {
-          console.log(event.data)
-          let new_d = parseInt(event.data);
-          if(!isNaN(new_d)) {
-              bass = new_d;
-              start_time = new Date().getTime() / 1000;
-              end_time = start_time + Math.PI;
-          }
-      }
+    //   var socket = new WebSocket("ws://127.0.0.1:1337");
+    //   socket.onmessage = function (event) {
+    //       console.log(event.data)
+    //       let new_d = parseInt(event.data);
+    //       if(!isNaN(new_d)) {
+    //           bass = new_d;
+    //           start_time = new Date().getTime() / 1000;
+    //           end_time = start_time + Math.PI;
+    //       }
+    //   }
 
       setInterval(() => {
-        for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
-          new_pos[i] = Math.random()*10 - 5;
+        if(step == 0) {
+            for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+              new_pos[i] = Math.random()*10 - 5;
+            }
+            //console.log(new_pos)
+            bass = 2;
+            start_time = new Date().getTime() / 1000;
+            end_time = start_time + Math.PI;
         }
-        //console.log(new_pos)
-        bass = 2;
-        start_time = new Date().getTime() / 1000;
-        end_time = start_time + Math.PI;
       }, 1000);
+
+        setTimeout(() => {
+            step += 1;
+        }, 10000)
   }
 
   init = () => {
@@ -136,12 +147,19 @@ export default class Viz extends Component {
     var lite  = THREE.AmbientLight(0xffffff, 1.0);
     scene.add(lite);
 
-    //fog
-    //scene.fog = new THREE.FogExp2(0xff0040, 2);
-
 
     var geometry1 = new THREE.DodecahedronGeometry( 100, 0 );
     var material1 = new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
+
+    var four_geometry = new THREE.TetrahedronGeometry( 25, 0 );
+    var four_material = new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
+
+    for(var i = 0; i < 4; i++) {
+        fourguys.push(new THREE.Mesh( four_geometry, four_material));
+        fourguys[i].position.z = -500;
+        scene.add(fourguys[i]);
+    }
+
 
     mesh1 = new THREE.Mesh( geometry1, material1 );
     mesh1.position.z = -500;
@@ -154,41 +172,86 @@ export default class Viz extends Component {
 
   }
 
+  phase1 = (time) => {
+      if(time - start_time > (end_time - start_time)/5) {
+        bass = 0;
+      }
+
+      change = Math.sin(((time - start_time) * 5) % Math.PI) * bass;
+
+
+      angle += Math.PI / 128;
+      geometry.attributes.position.array[0] = -10000;
+      geometry.attributes.position.array[1] = -10000;
+      var leader = {x: geometry.attributes.position.array[0], y: geometry.attributes.position.array[1]};
+
+      var j = 1;
+      for(var i = 3; i < geometry.attributes.position.array.length; i += 3){
+        geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2) + new_pos[i] * change);
+        geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20 + new_pos[i + 1] * change);
+        geometry.attributes.position.array[i + 2] = change != 0 ? -50 + new_pos[i + 2] * change : -50;
+
+        j += 1;
+      }
+
+      for(var i = 0; i < geometry.attributes.position.array.length; i++) {
+          last_seen[i] = geometry.attributes.position.array[i];
+      }
+
+
+  }
+
+  phase2 = (time) => {
+      var transition = (time - start_time) / 1;
+      if(transition > 1) {
+          transition = 1;
+      }
+
+      var j = 1;
+      var k = 0;
+      for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
+
+        var change = Math.abs(Math.sin(time % Math.PI + k / particle_num * Math.PI));
+        geometry.attributes.position.array[i] = (-35 + (k % (particle_num / 5) * (70 / particle_num * 5)) - last_seen[i]) * transition + last_seen[i];
+        geometry.attributes.position.array[i + 1] = ((-15 + (j - 1) / 4 * 30) - last_seen[i + 1]) * transition + last_seen[i + 1] + change;
+        geometry.attributes.position.array[i + 2] = -50;
+
+        k += 1;
+        if(k >=  particle_num / 5 * j) {
+            j += 1;
+        }
+      }
+
+      for(var i = 0; i < 4; i++) {
+          fourguys[i].position.x = (i % 2 == 0 ? -200: 200) * transition;
+          fourguys[i].position.y = (i < 2 ? -100  : 100) * transition;
+      }
+  }
+
   animate = () => {
-
     var time = new Date().getTime() / 1000;
-    if(time - start_time > (end_time - start_time)/5) {
-      bass = 0;
+
+    if(step == 0) {
+        this.phase1(time);
+    }
+    else {
+        this.phase2(time);
+        mesh1.position.z = -500 + (time - start_time) * 500;
     }
 
-    change = Math.sin(((time - start_time) * 5) % Math.PI) * bass;
-    console.log(change)
-
-
-    angle += Math.PI / 128;
-    geometry.attributes.position.array[0] = -10000;
-    geometry.attributes.position.array[1] = -10000;
-    var leader = {x: geometry.attributes.position.array[0], y: geometry.attributes.position.array[1]};
-
-    var j = 1;
-    for(var i = 3; i < geometry.attributes.position.array.length; i += 3){
-      // geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2) + change);
-      // geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20 + change);
-      geometry.attributes.position.array[i] = Math.cos(angle - lags[j-1].lag1) * (20 + Math.cos(time * lags[j-1].lag2) + new_pos[i] * change);
-      geometry.attributes.position.array[i + 1] = Math.sin(angle - lags[j-1].lag1) * (20 + new_pos[i + 1] * change);
-      geometry.attributes.position.array[i + 2] = change != 0 ? -50 + new_pos[i + 2] * change : -50;
-
-      j += 1;
-    }
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.size.needsUpdate = true;
 
 
-
-      requestAnimationFrame( this.animate );
+    requestAnimationFrame( this.animate );
 
     mesh1.rotation.x += 0.01;
     mesh1.rotation.y += 0.02;
+
+    for(var guy of fourguys) {
+        guy.rotation.x += 0.01;
+        guy.rotation.y += 0.02;
+    }
 
     renderer.render( scene, camera );
   }

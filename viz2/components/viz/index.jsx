@@ -6,6 +6,8 @@ import osc from 'osc-min';
 
 
 var scene, camera, renderer;
+var light1, light2;
+var lightIntensity = 0;
 var geometry, material;
 var meshes = [];
 var angle = Math.PI / 2;
@@ -54,16 +56,17 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-    //   var socket = new WebSocket("ws://127.0.0.1:1337");
-    //   socket.onmessage = function (event) {
-    //       console.log(event.data)
-    //       let new_d = parseInt(event.data);
-    //       if(!isNaN(new_d)) {
-    //           bass = new_d;
-    //           start_time = new Date().getTime() / 1000;
-    //           end_time = start_time + Math.PI;
-    //       }
-    //   }
+      var socket = new WebSocket("ws://127.0.0.1:1337");
+      socket.onmessage = function (event) {
+          console.log(event.data)
+          let new_d = parseInt(event.data);
+          if(!isNaN(new_d)) {
+							lightIntensity = 10;
+              bass = new_d;
+              start_time = new Date().getTime() / 1000;
+              end_time = start_time + Math.PI;
+          }
+      }
 
       setInterval(() => {
         if(step == 0) {
@@ -129,9 +132,9 @@ export default class Viz extends Component {
     scene.add( particles );
     //lights
     //var lightSphere = new THREE.SphereGeometry(0.5, 16, 8);
-    var light1 = new THREE.PointLight( 0x9975B9, 100, 0 );
+    light1 = new THREE.PointLight( 0x9975B9, 100, 0 );
     light1.position.set( 800, 0, -500 );
-    var light2 = new THREE.PointLight( 0x551A8B, 100, 0 );
+    light2 = new THREE.PointLight( 0x551A8B, 100, 0 );
     light2.position.set( -800, 0, -500 );
     // var light3 = new THREE.PointLight( 0x00ff00, 100, 0 );
     // light3.position.set( 0, 0, -200 );
@@ -238,6 +241,13 @@ export default class Viz extends Component {
         this.phase2(time);
         mesh1.position.z = -500 + (time - start_time) * 500;
     }
+
+		if (lightIntensity > 0) {
+			lightIntensity -= 0.5;
+		}
+
+		light1.intensity = lightIntensity;
+		light2.intensity = lightIntensity;
 
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.size.needsUpdate = true;

@@ -43,7 +43,11 @@ module.exports = {
 			},
 			{
 				test: /\.json$/,
-				loaders: ['json']
+				loaders: ['json-loader']
+			},
+			{
+				test: /\.txt$/,
+				loaders: ['raw-loader']
 			},
 			{
 				test: /\.glsl$/,

@@ -5,6 +5,12 @@ import sky from './sky.png';
 import THREE from 'three'
 import './mirror.js';
 import './water.js';
+import './plyloader.js';
+import roman from './roman.png';
+import vhs from './vhs.png'
+
+var dolphin;
+var dolphinLoaded = false;
 
 
 var scene, camera, renderer;
@@ -12,6 +18,11 @@ var geometry, material;
 var meshes = [];
 
 var water;
+var start_time = new Date().getTime() / 1000;
+var transition_time = 10;
+var step = 0;
+
+var backgroundScene, backgroundCamera;
 
 export default class Viz extends Component {
 
@@ -50,10 +61,8 @@ export default class Viz extends Component {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 10000 );
-    camera.position.set( 0, 0, -70000 );
-    //camera.lookAt(new THREE.Vector3(0, 0, -4000));
-    // camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.5, 3000000 );
-		// camera.position.set( 2000, 750, 2000 );
+    camera.position.set( 0, 0, 0 );
+    scene.background = new THREE.Color( 0xEED2EE );
 
     var texture = new THREE.CanvasTexture( this.generateTexture() );
     texture.wrapS = THREE.RepeatWrapping;
@@ -90,8 +99,8 @@ export default class Viz extends Component {
     var geometry = new THREE.BoxGeometry( 100, 200, 100 );
 
     for(var i = 0; i < 1000; i ++ ) {
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.position.x = Math.random() * 800 - 400;
+      let mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = Math.random() * 1600 - 800;
       mesh.position.y = Math.random() * 800 - 400;
       mesh.position.z = -Math.random() * 80000;
       meshes.push(mesh);
@@ -113,84 +122,149 @@ export default class Viz extends Component {
 		waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
     water = new THREE.Water( renderer, camera, scene, {
-					textureWidth: 512,
-					textureHeight: 512,
-					waterNormals: waterNormals,
-					alpha: 	1.0,
-					sunDirection: light.position.clone().normalize(),
-					sunColor: 0xffffff,
-					waterColor: 0x001e0f,
-					distortionScale: 50.0,
-				} );
+		textureWidth: 512,
+		textureHeight: 512,
+		waterNormals: waterNormals,
+		alpha: 	1.0,
+		sunDirection: light.position.clone().normalize(),
+		sunColor: 0xffffff,
+		waterColor: 0x001e0f,
+		distortionScale: 50.0,
+	} );
 
     var mirrorMesh = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
-					water.material
-				);
+		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
+		water.material
+	);
 
     mirrorMesh.position.y = -140;
     mirrorMesh.position.z = - 80000;
 
     mirrorMesh.add( water );
 
-		mirrorMesh.rotation.x = - Math.PI * 0.5;
-		scene.add( mirrorMesh );
+	mirrorMesh.rotation.x = - Math.PI * 0.5;
+	scene.add( mirrorMesh );
 
     var cubeMap = new THREE.CubeTexture( [] );
-		cubeMap.format = THREE.RGBFormat;
-		var loader = new THREE.ImageLoader();
-		loader.load( sky, function ( image ) {
-			var getSide = function ( x, y ) {
-				var size = 1024;
-				var canvas = document.createElement( 'canvas' );
-				canvas.width = size;
-				canvas.height = size;
-				var context = canvas.getContext( '2d' );
-				context.drawImage( image, - x * size, - y * size );
-				return canvas;
-			};
-			cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
-			cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
-			cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
-			cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
-			cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
-			cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
-			cubeMap.needsUpdate = true;
-		} );
-		var cubeShader = THREE.ShaderLib[ 'cube' ];
-		cubeShader.uniforms[ 'tCube' ].value = cubeMap;
-		var skyBoxMaterial = new THREE.ShaderMaterial( {
-			fragmentShader: cubeShader.fragmentShader,
-			vertexShader: cubeShader.vertexShader,
-			uniforms: cubeShader.uniforms,
-			depthWrite: false,
-			side: THREE.BackSide
-		} );
-		var skyBox = new THREE.Mesh(
-			new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
-			skyBoxMaterial
-		);
-		scene.add( skyBox );
+	cubeMap.format = THREE.RGBFormat;
+	var loader = new THREE.ImageLoader();
+	loader.load( sky, function ( image ) {
+		var getSide = function ( x, y ) {
+			var size = 1024;
+			var canvas = document.createElement( 'canvas' );
+			canvas.width = size;
+			canvas.height = size;
+			var context = canvas.getContext( '2d' );
+			context.drawImage( image, - x * size, - y * size );
+			return canvas;
+		};
+		cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
+		cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
+		cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
+		cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
+		cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
+		cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
+		cubeMap.needsUpdate = true;
+	} );
+	var cubeShader = THREE.ShaderLib[ 'cube' ];
+	cubeShader.uniforms[ 'tCube' ].value = cubeMap;
+	var skyBoxMaterial = new THREE.ShaderMaterial( {
+		fragmentShader: cubeShader.fragmentShader,
+		vertexShader: cubeShader.vertexShader,
+		uniforms: cubeShader.uniforms,
+		depthWrite: false,
+		side: THREE.BackSide
+	} );
+	var skyBox = new THREE.Mesh(
+		new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
+		skyBoxMaterial
+	);
+	scene.add( skyBox );
 
+    //dolpins
+    var loader = new THREE.PLYLoader();
+    loader.load( "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/ply/ascii/dolphins.ply", function ( geometry ) {
+		geometry.computeVertexNormals();
+		var material = new THREE.MeshStandardMaterial( { color: 0xff69b4} );
+		dolphin = new THREE.Mesh( geometry, material );
+		dolphin.position.y = 100;
+		dolphin.position.z =  -92000;
+		dolphin.position.x = 0;
+        dolphin.rotation.x = - Math.PI / 2;
+        dolphin.rotation.z =  - Math.PI / 2;
+		dolphin.scale.multiplyScalar( 1 );
+		dolphin.castShadow = true;
+		//mesh.receiveShadow = true;
+		scene.add( dolphin );
+        dolphinLoaded = true;
+	} );
+
+    let roman_texture = texture_loader.load(roman);
+    let bust_plane = new THREE.PlaneGeometry(400, 540);
+    let bust_material = new THREE.MeshBasicMaterial({ map: roman_texture, transparent: true, color: 0xffffff, depthWrite: false })
+    for(let i = 0; i < 100; i ++) {
+        let bust_geo = new THREE.Mesh(bust_plane, bust_material);
+        bust_geo.position.z = -93000 - Math.random()*20000;
+        bust_geo.position.y = Math.random() * 1000;
+        bust_geo.position.x = -10000 * (1 - i / 100);
+        bust_geo.rotation.y = Math.PI / 2;
+        scene.add(bust_geo);
+    }
+
+    renderer.setClearColor( 0xffffff, 0);
     document.body.appendChild( renderer.domElement );
-
   }
 
   animate = () => {
+    var time = new Date().getTime() / 1000;
     requestAnimationFrame( this.animate );
 
-    // for(let i = 0; i < 1000; i ++ ) {
-    //   meshes[i].rotation.x += Math.random()/100;
-    //   meshes[i].rotation.y += Math.random()/100;
-    //   meshes[i].rotation.z += Math.random()/100;
-    // }
+
+    for(var i = 0; i < 1000; i ++ ) {
+      meshes[i].rotation.y -= 0.1;
+      meshes[i].rotation.y -= 0.1;
+    }
+
+    if(time - start_time > transition_time) {
+        step += 1;
+        start_time = time;
+    }
+
     camera.position.z -= 10;
+
+    if(step == 0) {
+        camera.position.z = -92000*(time - start_time)/transition_time;
+    }
+    else if(step == 1){
+
+        camera.position.x = 2000 * (time - start_time) / 5;
+        if(camera.position.x > 2000) {
+            camera.position.x = 2000;
+        }
+        if(dolphinLoaded) {
+            dolphin.position.y = -475 + 300*Math.sin(time);
+            dolphin.position.z -= 10;
+            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(time) / 3.5 + Math.cos(time);
+            camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
+        }
+
+    }
+    else {
+        if(dolphinLoaded) {
+            dolphin.position.y = -475 + 300*Math.sin(time);
+            dolphin.position.z -= 10;
+            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(time) / 3.5 + Math.cos(time);
+            camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
+        }
+    }
 
 
     water.material.uniforms.time.value += 1.0 / 60.0;
     water.render();
 
-
+    // renderer.autoClear = false;
+    // renderer.clear();
+    // renderer.render(backgroundScene , backgroundCamera );
     renderer.render( scene, camera );
   }
 

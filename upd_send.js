@@ -11,7 +11,7 @@ wss.on('connection', function connection(ws) {
 });
 
 wss.broadcast = function broadcast(data) {
-  //console.log(data);
+  console.log(data);
   wss.clients.forEach(function each(client) {
     client.send(data);
   });
@@ -33,7 +33,7 @@ server.on('listening', function () {
 
 var counter = 0;
 server.on('message', function (message, remote) {
-    console.log(remote.address + ':' + remote.port +' - ' + message);
+    // console.log(remote.address + ':' + remote.port +' - ' + message);
     var buffer = osc.fromBuffer(message);
     if(buffer.address.indexOf("Note") > -1) {
       counter += 1;

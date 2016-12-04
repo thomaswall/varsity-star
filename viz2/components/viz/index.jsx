@@ -54,32 +54,44 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-    //   var socket = new WebSocket("ws://127.0.0.1:1337");
-    //   socket.onmessage = function (event) {
-    //       console.log(event.data)
-    //       let new_d = parseInt(event.data);
-    //       if(!isNaN(new_d)) {
-    //           bass = new_d;
-    //           start_time = new Date().getTime() / 1000;
-    //           end_time = start_time + Math.PI;
-    //       }
-    //   }
 
-      setInterval(() => {
-        if(step == 0) {
-            for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
-              new_pos[i] = Math.random()*10 - 5;
-            }
-            //console.log(new_pos)
-            bass = 2;
-            start_time = new Date().getTime() / 1000;
-            end_time = start_time + Math.PI;
+      var socket = new WebSocket("ws://192.168.0.9:1337");
+      socket.onmessage = (event) => {
+          console.log(event.data)
+          let new_d = parseInt(event.data);
+          if(!isNaN(new_d)) {
+              // bass = new_d;
+              // start_time = new Date().getTime() / 1000;
+              // end_time = start_time + Math.PI;
+              if(new_d == 60)
+                this.movePoints();
+              else if(new_d == 85)
+                step = 1;
+              else if(new_d == 84)
+                step = 0;
+
+          }
+      }
+
+      // setInterval(() => {
+      //   this.movePoints();
+      // }, 1000);
+
+        // setTimeout(() => {
+        //     step += 1;
+        // }, 2000)
+  }
+
+  movePoints = () => {
+    if(step == 0) {
+        for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+          new_pos[i] = Math.random()*10 - 5;
         }
-      }, 1000);
-
-        setTimeout(() => {
-            step += 1;
-        }, 2000)
+        //console.log(new_pos)
+        bass = 2;
+        start_time = new Date().getTime() / 1000;
+        end_time = start_time + Math.PI;
+    }
   }
 
   init = () => {

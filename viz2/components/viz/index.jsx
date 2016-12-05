@@ -77,9 +77,17 @@ export default class Viz extends Component {
         }
       }, 1000);
 
-        setTimeout(() => {
+        setInterval(() => {
             step += 1;
-        }, 2000)
+            if(step < 3) {
+                start_time = new Date().getTime() / 1000;
+                end_time = start_time + Math.PI;
+                for(var i = 0; i < geometry.attributes.position.array.length; i++) {
+                    last_seen[i] = geometry.attributes.position.array[i];
+                }
+            }
+
+        }, 5000)
   }
 
   init = () => {
@@ -228,15 +236,40 @@ export default class Viz extends Component {
       }
   }
 
+  phase3 = (time) => {
+      var transition = (time - start_time) / 3;
+      if(transition > 1) {
+          transition = 1;
+      }
+
+      var j = 1;
+      var k = 0;
+      for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
+
+        var change = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 6;
+        geometry.attributes.position.array[i] = ((-30 + (j - 1) / 4 * 60) - last_seen[i]) * transition + last_seen[i];
+        geometry.attributes.position.array[i + 1] = (-40 + (k % (particle_num / 5) * (80 / particle_num * 5)) - last_seen[i + 1]) * transition + last_seen[i + 1]  + change;
+        geometry.attributes.position.array[i + 2] = -50;
+
+        k += 1;
+        if(k >=  particle_num / 5 * j) {
+            j += 1;
+        }
+      }
+  }
+
   animate = () => {
     var time = new Date().getTime() / 1000;
 
     if(step == 0) {
         this.phase1(time);
     }
-    else {
+    else if(step == 1){
         this.phase2(time);
         mesh1.position.z = -500 + (time - start_time) * 500;
+    }
+    else {
+        this.phase3(time);
     }
 
     geometry.attributes.position.needsUpdate = true;

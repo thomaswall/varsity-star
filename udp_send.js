@@ -11,7 +11,6 @@ wss.on('connection', function connection(ws) {
 });
 
 wss.broadcast = function broadcast(data) {
-  //console.log(data);
   wss.clients.forEach(function each(client) {
     client.send(data);
   });
@@ -20,7 +19,7 @@ wss.broadcast = function broadcast(data) {
 
 
 
-var PORT = 33333;
+var PORT = 2346;
 var HOST = '0.0.0.0';
 
 var dgram = require('dgram');
@@ -33,7 +32,7 @@ server.on('listening', function () {
 
 var counter = 0;
 server.on('message', function (message, remote) {
-    console.log(remote.address + ':' + remote.port +' - ' + message);
+    // console.log(remote.address + ':' + remote.port +' - ' + message);
     var buffer = osc.fromBuffer(message);
     if(buffer.address.indexOf("Note") > -1) {
       counter += 1;

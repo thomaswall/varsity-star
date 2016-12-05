@@ -6,6 +6,8 @@ import osc from 'osc-min';
 
 
 var scene, camera, renderer;
+var light1, light2;
+var lightIntensity = 0;
 var geometry, material;
 var meshes = [];
 var angle = Math.PI / 2;
@@ -54,40 +56,53 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-    //   var socket = new WebSocket("ws://127.0.0.1:1337");
-    //   socket.onmessage = function (event) {
-    //       console.log(event.data)
-    //       let new_d = parseInt(event.data);
-    //       if(!isNaN(new_d)) {
-    //           bass = new_d;
-    //           start_time = new Date().getTime() / 1000;
-    //           end_time = start_time + Math.PI;
-    //       }
-    //   }
+      var socket = new WebSocket("ws://192.168.0.9:1337");
+      socket.onmessage = (event) => {
+          console.log(event.data)
+          let new_d = parseInt(event.data);
+          if(!isNaN(new_d)) {
+              // bass = new_d;
+              // start_time = new Date().getTime() / 1000;
+              // end_time = start_time + Math.PI;
+              if(new_d == 60)
+                this.movePoints();
+              else if(new_d == 85)
+                step = 1;
+              else if(new_d == 84)
+                step = 0;
 
-      setInterval(() => {
-        if(step == 0) {
-            for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
-              new_pos[i] = Math.random()*10 - 5;
-            }
-            //console.log(new_pos)
-            bass = 2;
-            start_time = new Date().getTime() / 1000;
-            end_time = start_time + Math.PI;
+          }
+      }
+
+      // setInterval(() => {
+      //   this.movePoints();
+      // }, 1000);
+
+        // setTimeout(() => {
+        //     step += 1;
+        // }, 2000)
+  }
+        // setInterval(() => {
+        //     step += 1;
+        //     if(step < 3) {
+        //         start_time = new Date().getTime() / 1000;
+        //         end_time = start_time + Math.PI;
+        //         for(var i = 0; i < geometry.attributes.position.array.length; i++) {
+        //             last_seen[i] = geometry.attributes.position.array[i];
+        //         }
+        //     }
+        //
+        // }, 5000)
+  movePoints = () => {
+    if(step == 0) {
+        for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+          new_pos[i] = Math.random()*10 - 5;
         }
-      }, 1000);
-
-        setInterval(() => {
-            step += 1;
-            if(step < 3) {
-                start_time = new Date().getTime() / 1000;
-                end_time = start_time + Math.PI;
-                for(var i = 0; i < geometry.attributes.position.array.length; i++) {
-                    last_seen[i] = geometry.attributes.position.array[i];
-                }
-            }
-
-        }, 5000)
+        //console.log(new_pos)
+        bass = 2;
+        start_time = new Date().getTime() / 1000;
+        end_time = start_time + Math.PI;
+    }
   }
 
   init = () => {
@@ -135,26 +150,17 @@ export default class Viz extends Component {
 
     var particles = new THREE.Points( geometry, material );
     scene.add( particles );
+
     //lights
-    //var lightSphere = new THREE.SphereGeometry(0.5, 16, 8);
-    var light1 = new THREE.PointLight( 0x9975B9, 100, 0 );
+    light1 = new THREE.PointLight( 0x9975B9, 100, 0 );
     light1.position.set( 800, 0, -500 );
-    var light2 = new THREE.PointLight( 0x551A8B, 100, 0 );
+    light2 = new THREE.PointLight( 0x551A8B, 100, 0 );
     light2.position.set( -800, 0, -500 );
-    // var light3 = new THREE.PointLight( 0x00ff00, 100, 0 );
-    // light3.position.set( 0, 0, -200 );
-    //light.add(new THREE.Mesh(lightSphere), new THREE.MeshBasicMaterial({color:0xff0040 }));
     light1.power = 20;
     light2.power = 20;
-    //light3.power = 20;
 
-    scene.add( light1);
+    scene.add(light1);
     scene.add(light2);
-    //scene.add(light3);
-
-    var lite  = THREE.AmbientLight(0xffffff, 1.0);
-    scene.add(lite);
-
 
     var geometry1 = new THREE.DodecahedronGeometry( 100, 0 );
     var material1 = new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
@@ -271,6 +277,13 @@ export default class Viz extends Component {
     else {
         this.phase3(time);
     }
+
+	// if (lightIntensity > 0) {
+	// 	lightIntensity -= 0.5;
+	// }
+    //
+	// light1.intensity = lightIntensity;
+	// light2.intensity = lightIntensity;
 
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.size.needsUpdate = true;

@@ -19,8 +19,10 @@ var meshes = [];
 
 var water;
 var start_time = new Date().getTime() / 1000;
-var transition_time = 10;
+var transition_time = 3;
 var step = 0;
+
+var last_sound = start_time;
 
 var backgroundScene, backgroundCamera;
 
@@ -31,13 +33,19 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-      var socket = new WebSocket("ws://127.0.0.1:1337");
-      socket.onmessage = function (event) {
+      var socket = new WebSocket("ws://192.168.0.9:1337");
+      socket.onmessage = (event) => {
+          console.log(event.data);
           let new_d = parseInt(event.data);
           if(!isNaN(new_d)) {
-              bass = new_d;
+              if(new_d == 57 || new_d == 52 || new_d == 64)
+                last_sound = new Date().getTime() / 1000;
           }
       }
+
+      setInterval(() => {
+        last_sound = new Date().getTime() / 1000;
+      }, 4000);
   }
 
   generateTexture = () => {
@@ -217,6 +225,8 @@ export default class Viz extends Component {
 
   animate = () => {
     var time = new Date().getTime() / 1000;
+    var dolphin_fly = (time - last_sound) < Math.PI/1.5 ? (time - last_sound) : 0;
+    dolphin_fly *= 2;
     requestAnimationFrame( this.animate );
 
 
@@ -242,18 +252,18 @@ export default class Viz extends Component {
             camera.position.x = 2000;
         }
         if(dolphinLoaded) {
-            dolphin.position.y = -475 + 300*Math.sin(time);
+            dolphin.position.y = -580 + 400*Math.sin(4 * Math.PI / 2 + dolphin_fly);
             dolphin.position.z -= 10;
-            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(time) / 3.5 + Math.cos(time);
+            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(dolphin_fly) / 3.5 + Math.cos(dolphin_fly);
             camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
         }
 
     }
     else {
         if(dolphinLoaded) {
-            dolphin.position.y = -475 + 300*Math.sin(time);
+            dolphin.position.y = -580 + 400*Math.sin(4 * Math.PI / 2 + dolphin_fly);
             dolphin.position.z -= 10;
-            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(time) / 3.5 + Math.cos(time);
+            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(dolphin_fly) / 3.5 + Math.cos(dolphin_fly);
             camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
         }
     }

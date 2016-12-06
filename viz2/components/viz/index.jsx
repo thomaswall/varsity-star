@@ -21,14 +21,19 @@ var change = 0;
 var start_time = new Date().getTime() / 1000;
 var end_time = start_time + Math.PI;
 
+var last_bump_time = start_time;
+
 var new_pos = [];
 for(var i = 0; i < particle_num * 3; i += 1){
   new_pos.push(0);
 }
 
 var last_seen = new Array(particle_num * 3);
+for(let i = 0; i < last_seen.length; i++) {
+    last_seen[i] = 0;
+}
 
-var step = 0;
+var step = 2;
 
 var vs = ["attribute float size;",
   "attribute vec3 customColor;",
@@ -61,48 +66,60 @@ export default class Viz extends Component {
           console.log(event.data)
           let new_d = parseInt(event.data);
           if(!isNaN(new_d)) {
-              // bass = new_d;
-              // start_time = new Date().getTime() / 1000;
-              // end_time = start_time + Math.PI;
+              start_time = new Date().getTime() / 1000;
               if(new_d == 60)
                 this.movePoints();
               else if(new_d == 85)
                 step = 1;
               else if(new_d == 84)
                 step = 0;
+              else if(new_d == 61)
+                this.bridgeMove();
 
           }
       }
 
-      // setInterval(() => {
-      //   this.movePoints();
-      // }, 1000);
+    //   setInterval(() => {
+    //     if(step != 2)
+    //         this.movePoints();
+    //     else
+    //         this.bridgeMove()
+    // }, 5000);
 
-        // setTimeout(() => {
-        //     step += 1;
-        // }, 2000)
+      setInterval(() => {
+          step += 1;
+          start_time = new Date().getTime() / 1000;
+          for(var i = 0; i < geometry.attributes.position.array.length; i++) {
+              last_seen[i] = geometry.attributes.position.array[i];
+          }
+          this.fadePos();
+      }, 10000);
   }
-        // setInterval(() => {
-        //     step += 1;
-        //     if(step < 3) {
-        //         start_time = new Date().getTime() / 1000;
-        //         end_time = start_time + Math.PI;
-        //         for(var i = 0; i < geometry.attributes.position.array.length; i++) {
-        //             last_seen[i] = geometry.attributes.position.array[i];
-        //         }
-        //     }
-        //
-        // }, 5000)
+
   movePoints = () => {
-    if(step == 0) {
-        for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
-          new_pos[i] = Math.random()*10 - 5;
-        }
-        //console.log(new_pos)
-        bass = 2;
-        start_time = new Date().getTime() / 1000;
-        end_time = start_time + Math.PI;
+    for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+      new_pos[i] = Math.random()*10 - 5;
     }
+    bass = 2;
+    last_bump_time = new Date().getTime() / 1000;
+    end_time = last_bump_time + Math.PI;
+  }
+
+  bridgeMove = () => {
+      for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+        new_pos[i] = Math.random()*50 - 25;
+      }
+      bass = 1;
+      last_bump_time = new Date().getTime() / 1000;
+      end_time = last_bump_time + Math.PI;
+  }
+
+  fadePos = () => {
+      let pos = 1;
+      for(var i = 0; i < geometry.attributes.position.array.length; i += 1){
+        pos = (Math.random() < 0.5 ? -1 : 1);
+        new_pos[i] = pos*100 + pos*Math.random()*10;
+      }
   }
 
   init = () => {
@@ -187,11 +204,12 @@ export default class Viz extends Component {
   }
 
   phase1 = (time) => {
-      if(time - start_time > (end_time - start_time)/5) {
+      mesh1.position.z = -500;
+      if(time - last_bump_time > (end_time - last_bump_time)/5) {
         bass = 0;
       }
 
-      change = Math.sin(((time - start_time) * 5) % Math.PI) * bass;
+      change = Math.sin(((time - last_bump_time) * 5) % Math.PI) * bass;
 
 
       angle += Math.PI / 128;
@@ -216,6 +234,13 @@ export default class Viz extends Component {
   }
 
   phase2 = (time) => {
+
+      if(time - last_bump_time > (end_time - last_bump_time)/5) {
+        bass = 0;
+      }
+      change = Math.sin(((time - last_bump_time) * 5) % Math.PI) * bass;
+
+
       var transition = (time - start_time) / 3;
       if(transition > 1) {
           transition = 1;
@@ -225,9 +250,9 @@ export default class Viz extends Component {
       var k = 0;
       for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
 
-        var change = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 3;
+        let wave = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 3;
         geometry.attributes.position.array[i] = (-30 + (k % (particle_num / 5) * (60 / particle_num * 5)) - last_seen[i]) * transition + last_seen[i];
-        geometry.attributes.position.array[i + 1] = ((-15 + (j - 1) / 4 * 30) - last_seen[i + 1]) * transition + last_seen[i + 1] + change;
+        geometry.attributes.position.array[i + 1] = ((-15 + (j - 1) / 4 * 30) - last_seen[i + 1]) * transition + last_seen[i + 1] + wave;
         geometry.attributes.position.array[i + 2] = -50;
 
         k += 1;
@@ -239,28 +264,54 @@ export default class Viz extends Component {
       for(var i = 0; i < 4; i++) {
           fourguys[i].position.x = (i % 2 == 0 ? -200: 200) * transition;
           fourguys[i].position.y = (i < 2 ? -100  : 100) * transition;
+          fourguys[i].position.z = -500 + 50*change;
       }
   }
 
   phase3 = (time) => {
-      var transition = (time - start_time) / 3;
+      let transition = (time - start_time) / 3;
       if(transition > 1) {
           transition = 1;
       }
+
+      if(time - last_bump_time > 4) {
+        bass = 0;
+      }
+
+      change = Math.sin((time - last_bump_time)/4 * Math.PI) * bass;
 
       var j = 1;
       var k = 0;
       for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
 
-        var change = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 6;
-        geometry.attributes.position.array[i] = ((-30 + (j - 1) / 4 * 60) - last_seen[i]) * transition + last_seen[i];
-        geometry.attributes.position.array[i + 1] = (-40 + (k % (particle_num / 5) * (80 / particle_num * 5)) - last_seen[i + 1]) * transition + last_seen[i + 1]  + change;
+        let wave = Math.sin((time + k * 2 / particle_num) % (Math.PI*1)) * 6;
+        geometry.attributes.position.array[i] = ((-30 + (j - 1) / 4 * 60) - last_seen[i]) * transition + last_seen[i] + new_pos[i] * change;
+        geometry.attributes.position.array[i + 1] = (-40 + (k % (particle_num / 5) * (80 / particle_num * 5)) - last_seen[i + 1]) * transition + last_seen[i + 1]  + wave + new_pos[i+1] * change;
         geometry.attributes.position.array[i + 2] = -50;
 
         k += 1;
         if(k >=  particle_num / 5 * j) {
             j += 1;
         }
+      }
+
+      for(var i = 0; i < 4; i++) {
+          fourguys[i].position.x = (i % 2 == 0 ? -200: 200) + transition*400;
+          fourguys[i].position.y = (i < 2 ? -100  : 100) + transition*400;
+          fourguys[i].position.z = -500 + 50*change;
+      }
+  }
+
+  fadePhase = (time) => {
+      let transition = (time - start_time) / 10;
+      if(transition > 1) {
+          transition = 1;
+      }
+
+      for(var i = 0; i < geometry.attributes.position.array.length; i += 3){
+        geometry.attributes.position.array[i] = last_seen[i] + new_pos[i] * transition;
+        geometry.attributes.position.array[i + 1] = last_seen[i + 1]  + new_pos[i+1] * transition;
+        geometry.attributes.position.array[i + 2] = -50;
       }
   }
 
@@ -274,16 +325,12 @@ export default class Viz extends Component {
         this.phase2(time);
         mesh1.position.z = -500 + (time - start_time) * 500;
     }
-    else {
+    else if(step == 2){
         this.phase3(time);
     }
-
-	// if (lightIntensity > 0) {
-	// 	lightIntensity -= 0.5;
-	// }
-    //
-	// light1.intensity = lightIntensity;
-	// light2.intensity = lightIntensity;
+    else {
+        this.fadePhase(time);
+    }
 
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.size.needsUpdate = true;

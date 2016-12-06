@@ -19,7 +19,7 @@ var meshes = [];
 
 var water;
 var start_time = new Date().getTime() / 1000;
-var transition_time = 3;
+var transition_time = 60;
 var step = 0;
 
 var last_sound = start_time;
@@ -145,7 +145,7 @@ export default class Viz extends Component {
 		water.material
 	);
 
-    mirrorMesh.position.y = -140;
+    mirrorMesh.position.y = -150;
     mirrorMesh.position.z = - 80000;
 
     mirrorMesh.add( water );
@@ -229,11 +229,14 @@ export default class Viz extends Component {
     dolphin_fly *= 2;
     requestAnimationFrame( this.animate );
 
-
-    for(var i = 0; i < 1000; i ++ ) {
-      meshes[i].rotation.y -= 0.1;
-      meshes[i].rotation.y -= 0.1;
+    if(dolphin_fly && dolphin_fly < 0.5) {
+        for(var i = 0; i < 1000; i ++ ) {
+          meshes[i].rotation.y -= 0.2;
+          meshes[i].rotation.x -= 0.2;
+          meshes[i].rotation.z -= 0.2;
+        }
     }
+
 
     if(time - start_time > transition_time) {
         step += 1;

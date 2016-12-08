@@ -3,6 +3,8 @@ import brownstone from './brownstone.jpg'
 import waterNormal from './waternormals.jpg';
 import sky from './sky.png';
 import THREE from 'three'
+var EffectComposer = require('three-effectcomposer')(THREE)
+import Film from './film.js';
 import './mirror.js';
 import './water.js';
 import './plyloader.js';
@@ -35,6 +37,8 @@ export default class Viz extends Component {
       super(props);
       this.init();
       this.animate();
+
+      this.composer;
 
       var socket = new WebSocket("ws://192.168.0.9:1337");
       socket.onmessage = (event) => {
@@ -230,6 +234,8 @@ export default class Viz extends Component {
 
     renderer.setClearColor( 0xffffff, 0);
     document.body.appendChild( renderer.domElement );
+
+    this.initPostprocessing();
   }
 
   rotateBuildings = (time) => {
@@ -250,6 +256,29 @@ export default class Viz extends Component {
           busts[i].scale.y = 1 + 0.5*change;
       }
 
+  }
+
+  initPostprocessing = () => {
+      var amount = 0.0;
+      var grayscaleIntensity = 0.0
+      if (this.composer) {
+          amount = this.composer.passes[2].uniforms.amount.value;
+          grayscaleIntensity = this.composer.passes[1].uniforms['grayscaleIntensity'].value;
+      }
+      this.composer = new EffectComposer(renderer);
+      this.composer.addPass(new EffectComposer.RenderPass(scene, camera));
+
+      let film = new EffectComposer.ShaderPass( THREE.Film );
+
+      film.uniforms['noiseIntensity'].value = 0.5;
+      film.uniforms['grayscaleIntensity'].value = grayscaleIntensity;
+
+      film.uniforms['scanlineIntensity'].value = 0.5;
+      film.uniforms['scanlineCount'].value = window.innerHeight*8.5;
+
+      film.renderToScreen = true;
+
+      this.composer.addPass( film );
   }
 
   animate = () => {
@@ -304,7 +333,16 @@ export default class Viz extends Component {
     // renderer.autoClear = false;
     // renderer.clear();
     // renderer.render(backgroundScene , backgroundCamera );
-    renderer.render( scene, camera );
+
+    this.composer.passes[1].uniforms['time'].value += 1/60;
+    if (this.grayscale && this.composer.passes[1].uniforms['grayscaleIntensity'].value < 1.1){
+        this.composer.passes[1].uniforms['grayscaleIntensity'].value += 0.005;
+    }
+    else if (!this.grayscale && this.composer.passes[1].uniforms['grayscaleIntensity'].value > 0){
+        this.composer.passes[1].uniforms['grayscaleIntensity'].value -= 0.005;
+    }
+
+    this.composer.render( scene, camera );
     requestAnimationFrame( this.animate );
   }
 

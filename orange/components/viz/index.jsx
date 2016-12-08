@@ -10,6 +10,8 @@ import Link from 'react-router';
 
 import Disc from '../../images/disc_thick.png';
 
+var start_time = new Date().getTime() / 1000;
+
 export default class AppComponent extends Component {
 
 	constructor = () => {
@@ -31,15 +33,6 @@ export default class AppComponent extends Component {
 		this.sprite;
 
 		this.ambientLight;
-
-	 	let socket = new WebSocket("ws://192.168.0.9:1337");
-      	socket.onmessage = (event) => {
-		  console.log(event.data);
-          let new_d = parseInt(event.data);
-          if(!isNaN(new_d)) {
-              //do shit here with new_d
-          }
-        }
 	}
 
 	init = () => {
@@ -85,15 +78,18 @@ export default class AppComponent extends Component {
 
 	animate = () => {
 
-		let bump = 255;
-		let grimeLevel = -(0.85 - bump/255);
-		grimeLevel = grimeLevel < 0 ? 0 : grimeLevel;
+		let time = new Date().getTime() / 1000;
+		let grimeLevel = 0.4 - (time - start_time)/0.5*0.4;
+		this.addGrimeLevel(grimeLevel < 0 ? 0 : grimeLevel);
+
+		// let bump = 255;
+		// let grimeLevel = -(0.85 - bump/255);
+		// grimeLevel = grimeLevel < 0 ? 0 : grimeLevel;
 
 		// let grayBox = document.getElementById('gray-box');
 		// if (bump > 240 && !grayBox.className){
 		// 	grayBox.className = 'solo-name';
 		// }
-		this.addGrimeLevel(grimeLevel);
 
 
 		this.composer.passes[1].uniforms['time'].value += 1/60;
@@ -153,9 +149,20 @@ export default class AppComponent extends Component {
 		this.init();
 		this.animate();
 		var initParticles = this.initParticles;
-		window.setInterval(function(){
-			initParticles();
-		}, 5000)
+		// window.setInterval(function(){
+		// 	initParticles();
+		// }, 5000)
+		var socket = new WebSocket("ws://192.168.0.9:1337");
+		socket.onmessage = (event) => {
+			console.log(event.data);
+			let new_d = parseInt(event.data);
+			if(!isNaN(new_d)) {
+				if(new_d == 60)
+					start_time = new Date().getTime() / 1000;
+				if(new_d == 112)
+					this.initParticles();
+			}
+		}
 
 	}
 
@@ -235,9 +242,9 @@ export default class AppComponent extends Component {
 
 	addGrimeLevel = (level) => {
 		if (!isNaN(level) && this.composer.passes[2].uniforms.amount.value != undefined){
-			this.composer.passes[2].uniforms['amount'].value = level/100 + 0.0015;
+			this.composer.passes[2].uniforms['amount'].value = level/50 + 0.0015;
 			this.composer.passes[1].uniforms['noiseIntensity'].value = level/3 + 0.3;
-			this.composer.passes[1].uniforms['scanlineIntensity'].value = level*1.3 + 0.05;
+			this.composer.passes[1].uniforms['scanlineIntensity'].value = level/4 + 0.05;
 		}
 	}
 

@@ -16,14 +16,17 @@ var dolphinLoaded = false;
 var scene, camera, renderer;
 var geometry, material;
 var meshes = [];
+var busts = [];
+var bust_xs = [];
 
 var water;
 var start_time = new Date().getTime() / 1000;
-var transition_time = 60;
+var transition_time = 100;
 var step = 0;
 
 var last_sound = start_time;
-
+var last_rotate = start_time - 1.4;
+var last_bump_time = start_time;
 var backgroundScene, backgroundCamera;
 
 export default class Viz extends Component {
@@ -40,12 +43,16 @@ export default class Viz extends Component {
           if(!isNaN(new_d)) {
               if(new_d == 57 || new_d == 52 || new_d == 64)
                 last_sound = new Date().getTime() / 1000;
+              if(new_d == 80 || new_d == 73 || new_d == 76 || new_d ==68)
+                last_rotate = new Date().getTime() / 1000;
+              if(new_d == 60)
+                last_bump_time = new Date().getTime() / 1000;
           }
       }
 
-      setInterval(() => {
-        last_sound = new Date().getTime() / 1000;
-      }, 4000);
+    //   setInterval(() => {
+    //     last_sound = new Date().getTime() / 1000;
+    //   }, 4000);
   }
 
   generateTexture = () => {
@@ -141,7 +148,7 @@ export default class Viz extends Component {
 	} );
 
     var mirrorMesh = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
+		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 5000 ),
 		water.material
 	);
 
@@ -210,12 +217,14 @@ export default class Viz extends Component {
     let roman_texture = texture_loader.load(roman);
     let bust_plane = new THREE.PlaneGeometry(400, 540);
     let bust_material = new THREE.MeshBasicMaterial({ map: roman_texture, transparent: true, color: 0xffffff, depthWrite: false })
-    for(let i = 0; i < 100; i ++) {
+    for(let i = 0; i < 1000; i ++) {
         let bust_geo = new THREE.Mesh(bust_plane, bust_material);
-        bust_geo.position.z = -93000 - Math.random()*20000;
+        bust_geo.position.z = -93000 - Math.random()*200000;
         bust_geo.position.y = Math.random() * 1000;
         bust_geo.position.x = -10000 * (1 - i / 100);
+        bust_xs.push(bust_geo.position.x);
         bust_geo.rotation.y = Math.PI / 2;
+        busts.push(bust_geo);
         scene.add(bust_geo);
     }
 
@@ -223,19 +232,36 @@ export default class Viz extends Component {
     document.body.appendChild( renderer.domElement );
   }
 
+  rotateBuildings = (time) => {
+      for(var i = 0; i < 1000; i ++ ) {
+        meshes[i].rotation.y -= 0.1;
+        meshes[i].rotation.x -= 0.1;
+        meshes[i].rotation.z -= 0.1;
+      }
+  }
+
+  bumpBusts = (time) => {
+      let bass = 1;
+      if(time - last_bump_time > 0.2)
+        bass = 0;
+      let change = Math.sin((time - last_bump_time)/0.2 * Math.PI) * bass;
+      for(let i = 0; i < 1000; i ++) {
+          busts[i].scale.x = 1 + 0.5*change;
+          busts[i].scale.y = 1 + 0.5*change;
+      }
+
+  }
+
   animate = () => {
     var time = new Date().getTime() / 1000;
     var dolphin_fly = (time - last_sound) < Math.PI/1.5 ? (time - last_sound) : 0;
     dolphin_fly *= 2;
-    requestAnimationFrame( this.animate );
 
-    if(dolphin_fly && dolphin_fly < 0.5) {
-        for(var i = 0; i < 1000; i ++ ) {
-          meshes[i].rotation.y -= 0.2;
-          meshes[i].rotation.x -= 0.2;
-          meshes[i].rotation.z -= 0.2;
-        }
+
+    if(time - last_rotate < 1.3) {
+        this.rotateBuildings();
     }
+    this.bumpBusts(time);
 
 
     if(time - start_time > transition_time) {
@@ -279,6 +305,7 @@ export default class Viz extends Component {
     // renderer.clear();
     // renderer.render(backgroundScene , backgroundCamera );
     renderer.render( scene, camera );
+    requestAnimationFrame( this.animate );
   }
 
 

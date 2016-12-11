@@ -5,11 +5,14 @@ import sky from './sky.png';
 import THREE from 'three'
 var EffectComposer = require('three-effectcomposer')(THREE)
 import Film from './film.js';
+import Pixelate from './pixelate.js';
 import './mirror.js';
 import './water.js';
 import './plyloader.js';
 import roman from './roman.png';
-import vhs from './vhs.png'
+import michel from './michelangelo.png';
+import vhs from './vhs.png';
+import windows from './windows.png';
 
 var dolphin;
 var dolphinLoaded = false;
@@ -23,13 +26,16 @@ var bust_xs = [];
 
 var water;
 var start_time = new Date().getTime() / 1000;
-var transition_time = 100;
+var transition_times = [3, 5, 16];
 var step = 0;
 
 var last_sound = start_time;
 var last_rotate = start_time - 1.4;
 var last_bump_time = start_time;
 var backgroundScene, backgroundCamera;
+var ma_geo;
+var box_geo;
+var uniforms;
 
 export default class Viz extends Component {
 
@@ -49,14 +55,22 @@ export default class Viz extends Component {
                 last_sound = new Date().getTime() / 1000;
               if(new_d == 80 || new_d == 73 || new_d == 76 || new_d ==68)
                 last_rotate = new Date().getTime() / 1000;
-              if(new_d == 60)
+              if(new_d == 60) {
                 last_bump_time = new Date().getTime() / 1000;
+                if(step == 2) {
+                    uniforms.pixelCount.value /= 2;
+                }
+              }
           }
       }
 
-    //   setInterval(() => {
-    //     last_sound = new Date().getTime() / 1000;
-    //   }, 4000);
+      setInterval(() => {
+        last_bump_time = new Date().getTime() / 1000;
+        if(step == 2) {
+            uniforms.pixelCount.value /= 2;
+            console.log(uniforms.pixelCount.value);
+        }
+    }, 2000);
   }
 
   generateTexture = () => {
@@ -81,7 +95,7 @@ export default class Viz extends Component {
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 10000 );
     camera.position.set( 0, 0, 0 );
-    scene.background = new THREE.Color( 0xEED2EE );
+    scene.background = new THREE.Color( 0.93, 0.82, 0.93 );
 
     var texture = new THREE.CanvasTexture( this.generateTexture() );
     texture.wrapS = THREE.RepeatWrapping;
@@ -152,12 +166,12 @@ export default class Viz extends Component {
 	} );
 
     var mirrorMesh = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 5000 ),
+		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
 		water.material
 	);
 
     mirrorMesh.position.y = -150;
-    mirrorMesh.position.z = - 80000;
+    mirrorMesh.position.z = -141000;
 
     mirrorMesh.add( water );
 
@@ -220,10 +234,19 @@ export default class Viz extends Component {
 
     let roman_texture = texture_loader.load(roman);
     let bust_plane = new THREE.PlaneGeometry(400, 540);
-    let bust_material = new THREE.MeshBasicMaterial({ map: roman_texture, transparent: true, color: 0xffffff, depthWrite: false })
+    THREE.Pixelate.uniforms.Texture = {type: 't', value: roman_texture};
+    THREE.Pixelate.uniforms.pixelCount.value = 1024.0;
+    let bust_material = new THREE.ShaderMaterial({
+        transparent: true,
+        uniforms: THREE.Pixelate.uniforms,
+        vertexShader: THREE.Pixelate.vertexShader,
+        fragmentShader: THREE.Pixelate.fragmentShader,
+        depthWrite: false
+    });
+
     for(let i = 0; i < 1000; i ++) {
         let bust_geo = new THREE.Mesh(bust_plane, bust_material);
-        bust_geo.position.z = -93000 - Math.random()*200000;
+        bust_geo.position.z = -93000 - Math.random()*100000;
         bust_geo.position.y = Math.random() * 1000;
         bust_geo.position.x = -10000 * (1 - i / 100);
         bust_xs.push(bust_geo.position.x);
@@ -231,6 +254,54 @@ export default class Viz extends Component {
         busts.push(bust_geo);
         scene.add(bust_geo);
     }
+
+    //michelangelo
+    let ma = texture_loader.load(michel);
+    uniforms = {...THREE.Pixelate.uniforms};
+    uniforms.Texture = {type: 't', value: ma};
+    uniforms.pixelCount.value = 5000.0;
+    let ma_plane = new THREE.PlaneGeometry(400, 1000);
+    let ma_material = new THREE.ShaderMaterial({
+        transparent: true,
+        uniforms: uniforms,
+        vertexShader: THREE.Pixelate.vertexShader,
+        fragmentShader: THREE.Pixelate.fragmentShader,
+        depthWrite: false
+    });
+
+    ma_geo = new THREE.Mesh(ma_plane, ma_material);
+    ma_geo.position.z = -191500;
+    ma_geo.position.y = 100;
+    ma_geo.position.x = 2000;
+    scene.add(ma_geo);
+
+    let windows_tex = texture_loader.load(windows);
+    let box_it = new THREE.BoxGeometry(150, 300, 300);
+    let box_materials = [];
+    for(var i =0;i < 6;i++) {
+      box_materials.push(new THREE.MeshBasicMaterial( {color: 0x806580} ));
+    }
+
+    THREE.CThru.uniforms = {"color": { type: "c", value: new THREE.Color( 0x806580 ) }, "texture": {type: "t", value: windows_tex}};
+    box_materials[0] = new THREE.ShaderMaterial( {
+        uniforms: THREE.CThru.uniforms,
+        vertexShader: THREE.CThru.vertexShader,
+        fragmentShader: THREE.CThru.fragmentShader,
+    });
+    box_materials[1] = new THREE.ShaderMaterial( {
+        uniforms: THREE.CThru.uniforms,
+        vertexShader: THREE.CThru.vertexShader,
+        fragmentShader: THREE.CThru.fragmentShader,
+    });
+    let box_material = new THREE.MultiMaterial(box_materials);
+    box_geo = new THREE.Mesh(box_it, box_material);
+    box_geo.position.z = ma_geo.position.z - 200;
+    box_geo.position.y = 0;
+    box_geo.position.x = 2025;
+    box_geo.scale.x = 0;
+    box_geo.scale.y = 0;
+    box_geo.scale.z = 0;
+    scene.add(box_geo);
 
     renderer.setClearColor( 0xffffff, 0);
     document.body.appendChild( renderer.domElement );
@@ -292,47 +363,63 @@ export default class Viz extends Component {
     }
     this.bumpBusts(time);
 
-
-    if(time - start_time > transition_time) {
-        step += 1;
-        start_time = time;
-    }
-
-    camera.position.z -= 10;
-
     if(step == 0) {
-        camera.position.z = -92000*(time - start_time)/transition_time;
+        camera.position.z = -92000*(time - start_time)/transition_times[0];
+        if(time - start_time > transition_times[0]) {
+            step += 1;
+            start_time = time;
+        }
     }
     else if(step == 1){
 
         camera.position.x = 2000 * (time - start_time) / 5;
+        camera.position.z = -90000 - 100000*(time - start_time)/transition_times[1];
         if(camera.position.x > 2000) {
             camera.position.x = 2000;
         }
         if(dolphinLoaded) {
             dolphin.position.y = -580 + 400*Math.sin(4 * Math.PI / 2 + dolphin_fly);
-            dolphin.position.z -= 10;
+            dolphin.position.z = -90000 - 100000*(time - start_time)/transition_times[1];
             dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(dolphin_fly) / 3.5 + Math.cos(dolphin_fly);
             camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
         }
 
-    }
-    else {
-        if(dolphinLoaded) {
-            dolphin.position.y = -580 + 400*Math.sin(4 * Math.PI / 2 + dolphin_fly);
-            dolphin.position.z -= 10;
-            dolphin.rotation.x = 3 * Math.PI / 2 + Math.sin(dolphin_fly) / 3.5 + Math.cos(dolphin_fly);
-            camera.lookAt(new THREE.Vector3(0, 0, dolphin.position.z));
+        if(time - start_time > transition_times[1]) {
+            step += 1;
+            start_time = time;
         }
+
+    }
+    else if(step == 2){
+        let new_x = ma_geo.position.x*(time - start_time) / 3;
+        if(new_x > ma_geo.position.x) {
+            new_x = ma_geo.position.x;
+        }
+        camera.lookAt(new THREE.Vector3(new_x, ma_geo.position.y, ma_geo.position.z));
+
+        if(uniforms.pixelCount.value < 20){
+            step += 1;
+            start_time = time;
+        }
+    }
+    else if(step == 3) {
+        let color_trans = (time - start_time)/10;
+        if(color_trans > 1) {
+            color_trans = 1;
+        }
+        scene.background = new THREE.Color( 0.93 - 0.7*color_trans, 0.82 - 0.6*color_trans, 0.93 - 0.7*color_trans );
+        
+        box_geo.scale.x = 1;
+        box_geo.scale.y = 1;
+        box_geo.scale.z = 1;
+        box_geo.position.z -= 10;
+        box_geo.rotation.y -= 0.02;
+        camera.position.z -= 10;
     }
 
 
     water.material.uniforms.time.value += 1.0 / 60.0;
     water.render();
-
-    // renderer.autoClear = false;
-    // renderer.clear();
-    // renderer.render(backgroundScene , backgroundCamera );
 
     this.composer.passes[1].uniforms['time'].value += 1/60;
     if (this.grayscale && this.composer.passes[1].uniforms['grayscaleIntensity'].value < 1.1){

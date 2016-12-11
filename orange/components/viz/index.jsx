@@ -1,6 +1,6 @@
 // Three.js + Postprocessing
 import THREE from 'three';
-var EffectComposer = require('three-effectcomposer')(THREE)
+var EffectComposer = require('three-effectcomposer')(THREE);
 import RGBShiftShader from '../../shaders/RGBShiftShader.js';
 import Film from '../../shaders/Film.js'
 import FXAA from '../../shaders/FXAA.js';
@@ -22,6 +22,8 @@ export default class AppComponent extends Component {
 		this.composer;
 		this.grayscale;
 
+		this.hue;
+
 		// Camera scrim
 		this.windowHalfX = window.innerWidth / 2;
 		this.windowHalfY = window.innerHeight / 2;
@@ -38,6 +40,7 @@ export default class AppComponent extends Component {
 	init = () => {
 
 			const white = 0xffffff;
+			this.hue = 218/360;
 
 			this.sprite = new THREE.TextureLoader().load( Disc );
 
@@ -65,7 +68,7 @@ export default class AppComponent extends Component {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 			// this.renderer.setClearColor( 0xfff1e7 );
-			this.renderer.setClearColor( 0xfbe1c4);
+			this.renderer.setClearColor( 0xC3D8FB);
 
 			window.addEventListener( 'resize', this.onWindowResize, false );
 			document.getElementById('index').appendChild( this.renderer.domElement );
@@ -85,11 +88,6 @@ export default class AppComponent extends Component {
 		// let bump = 255;
 		// let grimeLevel = -(0.85 - bump/255);
 		// grimeLevel = grimeLevel < 0 ? 0 : grimeLevel;
-
-		// let grayBox = document.getElementById('gray-box');
-		// if (bump > 240 && !grayBox.className){
-		// 	grayBox.className = 'solo-name';
-		// }
 
 
 		this.composer.passes[1].uniforms['time'].value += 1/60;
@@ -130,7 +128,33 @@ export default class AppComponent extends Component {
 			particleExplosion.particles.rotation.y = yRotation + 0.0006;
 			particleExplosion.particles.rotation.x = xRotation - 0.0006;
 
+
+			let pColor = particleExplosion.particleMaterial.color.getHSL();
+			let cColor = this.renderer.getClearColor().getHSL();
+
+			if (pColor.h > this.hue) {
+					pColor.h -= 1/360;
+			}
+			else if (pColor.h < this.hue) {
+				pColor.h += 1/360;
+			}
+
+			if (cColor.h > this.hue) {
+				cColor.h -= 1/360;
+			}
+			else if (cColor.h < this.hue) {
+				cColor.h += 1/360;
+			}
+
+			let clear = new THREE.Color();
+			clear.setHSL(cColor.h, cColor.s, cColor.l);
+
+			this.renderer.setClearColor(clear);
+			particleExplosion.particleMaterial.color.setHSL(pColor.h, pColor.s, pColor.l);
+
+
 			particleExplosion.particleGeometry.attributes.position.needsUpdate = true;
+
 		}
 
 
@@ -152,6 +176,7 @@ export default class AppComponent extends Component {
 		// window.setInterval(function(){
 		// 	initParticles();
 		// }, 5000)
+		// var socket = new WebSocket("ws://0.0.0.0:1337");
 		var socket = new WebSocket("ws://192.168.0.9:1337");
 		socket.onmessage = (event) => {
 			console.log(event.data);
@@ -161,6 +186,14 @@ export default class AppComponent extends Component {
 					start_time = new Date().getTime() / 1000;
 				if(new_d == 112)
 					this.initParticles();
+				if(new_d == 113)
+					this.hue = 26/360;
+				if(new_d == 114)
+					this.hue = 218/360;
+				if(new_d == 115)
+					this.hue = 130/360;
+				if(new_d == 127)
+					this.grayscale = true;
 			}
 		}
 
@@ -224,7 +257,7 @@ export default class AppComponent extends Component {
 			// // itemSize = 3 because there are 3 values (components) per vertex
 
 			particleExplosion.particleMaterial = new THREE.PointsMaterial( { size: 0.65, sizeAttenuation: true, map: this.sprite, alphaTest: 0.3, transparent: true } );
-			particleExplosion.particleMaterial.color.setHSL(26/360, 0.9, (Math.random()/2+0.5) );
+			particleExplosion.particleMaterial.color.setHSL(this.hue, 0.9, (Math.random()/2+0.5) );
 
 			particleExplosion.particleGeometry.addAttribute( 'position', new THREE.BufferAttribute( particleExplosion.vertices, 3 , false) );
 

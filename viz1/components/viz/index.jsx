@@ -26,7 +26,7 @@ var bust_xs = [];
 
 var water;
 var start_time = new Date().getTime() / 1000;
-var transition_times = [3, 5, 16];
+var transition_times = [96, 105,16];//[96,105,16];
 var step = 0;
 
 var last_sound = start_time;
@@ -51,26 +51,26 @@ export default class Viz extends Component {
           console.log(event.data);
           let new_d = parseInt(event.data);
           if(!isNaN(new_d)) {
-              if(new_d == 57 || new_d == 52 || new_d == 64)
+              if(new_d == 82)
                 last_sound = new Date().getTime() / 1000;
               if(new_d == 80 || new_d == 73 || new_d == 76 || new_d ==68)
                 last_rotate = new Date().getTime() / 1000;
               if(new_d == 60) {
                 last_bump_time = new Date().getTime() / 1000;
                 if(step == 2) {
-                    uniforms.pixelCount.value /= 2;
+                    uniforms.pixelCount.value -= uniforms.pixelCount.value / 10;
                 }
               }
           }
       }
 
-      setInterval(() => {
-        last_bump_time = new Date().getTime() / 1000;
-        if(step == 2) {
-            uniforms.pixelCount.value /= 2;
-            console.log(uniforms.pixelCount.value);
-        }
-    }, 2000);
+    //   setInterval(() => {
+    //     last_bump_time = new Date().getTime() / 1000;
+    //     if(step == 2) {
+    //         uniforms.pixelCount.value /= 2;
+    //         console.log(uniforms.pixelCount.value);
+    //     }
+    // }, 2000);
   }
 
   generateTexture = () => {
@@ -93,7 +93,7 @@ export default class Viz extends Component {
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 10000 );
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 10, 50000 );
     camera.position.set( 0, 0, 0 );
     scene.background = new THREE.Color( 0.93, 0.82, 0.93 );
 
@@ -166,12 +166,12 @@ export default class Viz extends Component {
 	} );
 
     var mirrorMesh = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 500 ),
+		new THREE.PlaneBufferGeometry( 200 * 500, 200 * 550 ),
 		water.material
 	);
 
     mirrorMesh.position.y = -150;
-    mirrorMesh.position.z = -141000;
+    mirrorMesh.position.z = -140000;
 
     mirrorMesh.add( water );
 
@@ -306,6 +306,21 @@ export default class Viz extends Component {
     renderer.setClearColor( 0xffffff, 0);
     document.body.appendChild( renderer.domElement );
 
+    var backgroundMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2, 0),
+        new THREE.MeshBasicMaterial({
+            map: windows_tex
+    }));
+
+    backgroundMesh.material.depthTest = false;
+    backgroundMesh.material.depthWrite = false;
+
+    // Create your background scene
+    backgroundScene = new THREE.Scene();
+    backgroundCamera = new THREE.Camera();
+    backgroundScene .add(backgroundCamera );
+    backgroundScene .add(backgroundMesh );
+
     this.initPostprocessing();
   }
 
@@ -341,11 +356,11 @@ export default class Viz extends Component {
 
       let film = new EffectComposer.ShaderPass( THREE.Film );
 
-      film.uniforms['noiseIntensity'].value = 0.5;
+      film.uniforms['noiseIntensity'].value = 0.7;
       film.uniforms['grayscaleIntensity'].value = grayscaleIntensity;
 
       film.uniforms['scanlineIntensity'].value = 0.5;
-      film.uniforms['scanlineCount'].value = window.innerHeight*8.5;
+      film.uniforms['scanlineCount'].value = window.innerHeight*11.5;
 
       film.renderToScreen = true;
 
@@ -408,7 +423,7 @@ export default class Viz extends Component {
             color_trans = 1;
         }
         scene.background = new THREE.Color( 0.93 - 0.7*color_trans, 0.82 - 0.6*color_trans, 0.93 - 0.7*color_trans );
-        
+
         box_geo.scale.x = 1;
         box_geo.scale.y = 1;
         box_geo.scale.z = 1;
@@ -429,6 +444,7 @@ export default class Viz extends Component {
         this.composer.passes[1].uniforms['grayscaleIntensity'].value -= 0.005;
     }
 
+    this.composer.render(backgroundScene, backgroundCamera);
     this.composer.render( scene, camera );
     requestAnimationFrame( this.animate );
   }

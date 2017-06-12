@@ -63,37 +63,37 @@ export default class Viz extends Component {
       this.init();
       this.animate();
 
-      var socket = new WebSocket("ws://192.168.0.9:1337");
+      var socket = new WebSocket("ws://localhost:1337");
       socket.onmessage = (event) => {
           console.log(event.data)
           let new_d = parseInt(event.data);
           if(!isNaN(new_d)) {
-              if(new_d == 60 && step != 2)
+              if(new_d == 1 && step != 2)
                 this.movePoints();
-              else if(new_d == 85) {
+              else if(new_d == 2) {
                   step = 1;
                   start_time = new Date().getTime() / 1000;
                   for(var i = 0; i < geometry.attributes.position.array.length; i++) {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 84) {
+              else if(new_d == 3) {
                   step = 0;
                   start_time = new Date().getTime() / 1000;
                   for(var i = 0; i < geometry.attributes.position.array.length; i++) {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 86) {
+              else if(new_d == 4) {
                   step = 2;
                   start_time = new Date().getTime() / 1000;
                   for(var i = 0; i < geometry.attributes.position.array.length; i++) {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 61)
+              else if(new_d == 5)
                 this.bridgeMove();
-              else if(new_d == 87) {
+              else if(new_d == 6) {
                   this.fadePos();
                   step = 3;
                   start_time = new Date().getTime() / 1000;

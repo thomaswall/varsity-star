@@ -174,9 +174,10 @@ export default class AppComponent extends Component {
 		this.animate();
 		var initParticles = this.initParticles;
 		// var socket = new WebSocket("ws://0.0.0.0:1337");
-		var socket = new WebSocket("ws://192.168.0.9:1337");
+		var socket = new WebSocket("ws://localhost:1337");
 		socket.onmessage = (event) => {
-			let new_d = parseInt(event.data);
+			let new_d = event.data;
+		
 			console.log(new_d)
 				if (new_d == "Bump")
 					start_time = new Date().getTime() / 1000;

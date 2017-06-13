@@ -66,8 +66,8 @@ export default class Viz extends Component {
       var socket = new WebSocket("ws://localhost:1337");
       socket.onmessage = (event) => {
           console.log(event.data)
-          let new_d = parseInt(event.data);
-          if (!isNaN(new_d)) {
+          let new_d = event.data;
+          if (true) {
               if (event.data == "Boom" && step != 2)
                 this.movePoints();
               else if (new_d == 2) {

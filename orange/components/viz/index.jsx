@@ -173,28 +173,29 @@ export default class AppComponent extends Component {
 		this.init();
 		this.animate();
 		var initParticles = this.initParticles;
-		// window.setInterval(function(){
-		// 	initParticles();
-		// }, 5000)
 		// var socket = new WebSocket("ws://0.0.0.0:1337");
 		var socket = new WebSocket("ws://192.168.0.9:1337");
 		socket.onmessage = (event) => {
-			console.log(event.data);
 			let new_d = parseInt(event.data);
-			if(!isNaN(new_d)) {
-				if(new_d == 60)
+			console.log(new_d)
+				if (new_d == "Bump")
 					start_time = new Date().getTime() / 1000;
-				if(new_d == 112)
+				if (new_d == "Particles")
 					this.initParticles();
-				if(new_d == 113)
+				if (new_d == 1) {
+					this.grayscale = false;
 					this.hue = 26/360;
-				if(new_d == 114)
+				}
+				if (new_d == 2) {
+					this.grayscale = false;
 					this.hue = 218/360;
-				if(new_d == 115)
+				}
+				if (new_d == 3) {
+					this.grayscale = false;
 					this.hue = 130/360;
-				if(new_d == 127)
+				}
+				if (new_d == 4)
 					this.grayscale = true;
-			}
 		}
 
 	}

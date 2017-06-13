@@ -68,7 +68,7 @@ export default class Viz extends Component {
           console.log(event.data)
           let new_d = parseInt(event.data);
           if(!isNaN(new_d)) {
-              if(new_d == 1 && step != 2)
+              if(event.data == "Boom" && step != 2)
                 this.movePoints();
               else if(new_d == 2) {
                   step = 1;
@@ -77,23 +77,23 @@ export default class Viz extends Component {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 3) {
+              else if(new_d == 1) {
                   step = 0;
                   start_time = new Date().getTime() / 1000;
                   for(var i = 0; i < geometry.attributes.position.array.length; i++) {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 4) {
+              else if(new_d == 3) {
                   step = 2;
                   start_time = new Date().getTime() / 1000;
                   for(var i = 0; i < geometry.attributes.position.array.length; i++) {
                       last_seen[i] = geometry.attributes.position.array[i];
                   }
               }
-              else if(new_d == 5)
+              else if(event.data == "Scatter")
                 this.bridgeMove();
-              else if(new_d == 6) {
+              else if(new_d == 4) {
                   this.fadePos();
                   step = 3;
                   start_time = new Date().getTime() / 1000;

@@ -68,7 +68,10 @@ export default class AppComponent extends Component {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 			// this.renderer.setClearColor( 0xfff1e7 );
-			this.renderer.setClearColor( 0xC3D8FB);
+
+			let clear = new THREE.Color(0xC3D8FB);
+			clear.setHSL(clear.h, clear.s, clear.l - 0.5);
+			this.renderer.setClearColor(clear);
 
 			window.addEventListener( 'resize', this.onWindowResize, false );
 			document.getElementById('index').appendChild( this.renderer.domElement );
@@ -82,7 +85,7 @@ export default class AppComponent extends Component {
 	animate = () => {
 
 		let time = new Date().getTime() / 1000;
-		let grimeLevel = 0.4 - (time - start_time)/0.5*0.4;
+		let grimeLevel = 0.7 - (time - start_time)/0.5 * 0.7;
 		this.addGrimeLevel(grimeLevel < 0 ? 0 : grimeLevel);
 
 		// let bump = 255;
@@ -147,7 +150,7 @@ export default class AppComponent extends Component {
 			}
 
 			let clear = new THREE.Color();
-			clear.setHSL(cColor.h, cColor.s, cColor.l);
+			clear.setHSL(cColor.h, cColor.s, cColor.l - 0.5);
 
 			this.renderer.setClearColor(clear);
 			particleExplosion.particleMaterial.color.setHSL(pColor.h, pColor.s, pColor.l);
@@ -177,26 +180,27 @@ export default class AppComponent extends Component {
 		var socket = new WebSocket("ws://192.168.0.9:1337");
 		socket.onmessage = (event) => {
 			let new_d = parseInt(event.data);
-			console.log(new_d)
-				if (new_d == "Bump")
-					start_time = new Date().getTime() / 1000;
-				if (new_d == "Particles")
-					this.initParticles();
-				if (new_d == 1) {
-					this.grayscale = false;
-					this.hue = 26/360;
-				}
-				if (new_d == 2) {
-					this.grayscale = false;
-					this.hue = 218/360;
-				}
-				if (new_d == 3) {
-					this.grayscale = false;
-					this.hue = 130/360;
-				}
-				if (new_d == 4)
-					this.grayscale = true;
+			if (new_d == "Bump")
+				start_time = new Date().getTime() / 1000;
+			if (new_d == "Particles")
+				this.initParticles();
+			if (new_d == 1) {
+				this.grayscale = false;
+				this.hue = 26/360;
+			}
+			if (new_d == 2) {
+				this.grayscale = false;
+				this.hue = 218/360;
+			}
+			if (new_d == 3) {
+				this.grayscale = false;
+				this.hue = 130/360;
+			}
+			if (new_d == 4)
+				this.grayscale = true;
 		}
+
+		document.addEventListener("keydown", this.test);
 
 	}
 
@@ -204,6 +208,10 @@ export default class AppComponent extends Component {
 		let mouseX = event.pageX/window.innerWidth;
 		let mouseY = 1 - event.pageY/window.innerHeight;
 		this.initParticles(mouseX, mouseY);
+	}
+
+	test = (event) => {
+		start_time = new Date().getTime() / 1000;
 	}
 
 	initParticles = (x, y) => {
@@ -276,9 +284,9 @@ export default class AppComponent extends Component {
 
 	addGrimeLevel = (level) => {
 		if (!isNaN(level) && this.composer.passes[2].uniforms.amount.value != undefined){
-			this.composer.passes[2].uniforms['amount'].value = level/50 + 0.0015;
-			this.composer.passes[1].uniforms['noiseIntensity'].value = level/3 + 0.3;
-			this.composer.passes[1].uniforms['scanlineIntensity'].value = level/4 + 0.05;
+			this.composer.passes[2].uniforms['amount'].value = level/30 + 0.0015;
+			this.composer.passes[1].uniforms['noiseIntensity'].value = level + 0.3;
+			this.composer.passes[1].uniforms['scanlineIntensity'].value = level + 0.05;
 		}
 	}
 
@@ -334,7 +342,7 @@ export default class AppComponent extends Component {
 
 	render = () => {
     return (
-      <div onClick={this.clickPing} className="index" id="index">
+      <div onKeyPress={this.test} onClick={this.clickPing} className="index" id="index">
       </div>
     );
   }

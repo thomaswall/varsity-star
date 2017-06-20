@@ -171,7 +171,7 @@ export default class Viz extends Component {
     for ( var i = 0, l = particle_num; i < l; i ++ ) {
       vertex = new THREE.Vector3(0, 0, -50);
       vertex.toArray( positions, i * 3 );
-      color.setHSL( 0.9, 1.0, 0.75 )
+      color.setHSL( 0.9, 1.0, 0.8 )
       color.toArray( colors, i * 3 );
       sizes[ i ] = 1.5;
     }
@@ -206,10 +206,10 @@ export default class Viz extends Component {
     scene.add(light2);
 
     var geometry1 = new THREE.DodecahedronGeometry( 100, 0 );
-    var material1 = new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
+    var material1 = new THREE.MeshPhongMaterial( { color: 0xaa8cc5, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
 
     var four_geometry = new THREE.TetrahedronGeometry( 25, 0 );
-    var four_material = new THREE.MeshPhongMaterial( { color: 0x555555, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
+    var four_material = new THREE.MeshPhongMaterial( { color: 0xaa8cc5, specular: 0x111111, shininess: 50, shading: THREE.FlatShading });
 
     for (var i = 0; i < 4; i++) {
         fourguys.push(new THREE.Mesh( four_geometry, four_material));

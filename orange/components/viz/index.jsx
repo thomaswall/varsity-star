@@ -260,7 +260,7 @@ export default class AppComponent extends Component {
 			// // itemSize = 3 because there are 3 values (components) per vertex
 
 			particleExplosion.particleMaterial = new THREE.PointsMaterial( { size: 0.65, sizeAttenuation: true, map: this.sprite, alphaTest: 0.3, transparent: true } );
-			particleExplosion.particleMaterial.color.setHSL(this.hue, 0.9, (Math.random()/2+0.5) );
+			particleExplosion.particleMaterial.color.setHSL(this.hue, 0.9, (Math.random() * 7 / 10 + 0.2) );
 
 			particleExplosion.particleGeometry.addAttribute( 'position', new THREE.BufferAttribute( particleExplosion.vertices, 3 , false) );
 

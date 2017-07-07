@@ -10,7 +10,7 @@ import trianglesFrag from './shaders/triangles.frag';
 import trianglesDistance from './shaders/trianglesDistance.vert';
 import trianglesDistanceFrag from './shaders/trianglesDistance.frag';
 
-let amountDim = 1024;
+let amountDim = 256;
 
 let renderer;
 let container;
@@ -28,6 +28,7 @@ let init = (_renderer, _camera) => {
 	color2 = new THREE.Color('#ffffff');
 
 	mesh = createTriangleMesh(_camera);
+	container.add(mesh);
 }
 
 let createTriangleMesh = (_camera) => {
@@ -144,7 +145,6 @@ let createTriangleMesh = (_camera) => {
 
 	_mesh.castShadow = true;
     _mesh.receiveShadow = true;
-    container.add(_mesh);
 
     return _mesh;
 

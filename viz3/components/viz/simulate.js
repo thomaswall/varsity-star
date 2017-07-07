@@ -17,7 +17,7 @@ let scene;
 let camera;
 
 
-let amountDim = 1024;
+let amountDim = 256;
 
 let followPoint;
 let followPointTime = 0;
@@ -50,7 +50,7 @@ let init = _renderer => {
 			mouse3d: { type: 'v3', value: new THREE.Vector3 },
 			speed: { type: 'f', value: 1 },
             dieSpeed: { type: 'f', value: 0.015 },
-            radius: { type: 'f', value: 1 },
+            radius: { type: 'f', value: 0.6 },
             curlSize: { type: 'f', value: 0.02 },
             attraction: { type: 'f', value: 1 },
             time: { type: 'f', value: 5 },
@@ -120,7 +120,7 @@ let updatePosition = dt => {
 	positionRenderTarget2 = tmp;
 
 	mesh.material = positionShader;
-	positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition.texture;
+	positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition;
 	positionShader.uniforms.texturePosition.value = positionRenderTarget2.texture;
 	positionShader.uniforms.time.value += dt * 0.001;
 	renderer.render(scene, camera, positionRenderTarget);
@@ -143,7 +143,7 @@ let update = dt => {
 	positionShader.uniforms.initAnimation.value = initAnimation;
 
 	positionShader.uniforms.speed.value = 1 * deltaRatio;
-	// positionShader.uniforms.dieSpeed.value
+	positionShader.uniforms.dieSpeed.value = 0.015 * deltaRatio;
 
 	followPointTime += parseFloat(dt * 0.001 * 1);
 	followPoint.set(

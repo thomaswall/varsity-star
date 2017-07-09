@@ -3,6 +3,7 @@ import THREE from 'three'
 import simulate from './simulate.js'
 import particles from './particles.js'
 import OrbitControls from './controls.js';
+import constants from './constants.js';
 
 let scene, camera, renderer, control;
 let last_time = Date.now();
@@ -33,7 +34,8 @@ export default class Viz extends Component {
     scene.fog = new THREE.FogExp2(0xffffff, 0.001);
 
     camera = new THREE.PerspectiveCamera(45, 1, 10, 3000);
-    camera.position.set(300, 60, 300).normalize().multiplyScalar(1000);
+    //camera.position.set(300, 60, 300).normalize().multiplyScalar(1000);
+    camera.position.set(0, 0, 700);
     console.log(camera.position);
 
     simulate.init(renderer);
@@ -46,6 +48,8 @@ export default class Viz extends Component {
     control.minPolarAngle = 0.3;
     control.maxPolarAngle = Math.PI / 2 - 0.1;
     control.noPan = true;
+    console.log(camera.position)
+    
     control.update();
 }
 
@@ -60,6 +64,18 @@ export default class Viz extends Component {
 
     renderer.render( scene, camera );
     requestAnimationFrame( this.animate );
+  }
+
+  componentWillMount = () => {
+    document.addEventListener("keydown", this.onKeyDown);
+  }
+
+  onKeyDown = event => {
+    let key = event.keyCode;
+    console.log(key);
+
+    if(key == 13)
+      constants.particleRestart = Date.now();
   }
 
 

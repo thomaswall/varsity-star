@@ -9,8 +9,10 @@ import triangles from './shaders/triangles.vert';
 import trianglesFrag from './shaders/triangles.frag';
 import trianglesDistance from './shaders/trianglesDistance.vert';
 import trianglesDistanceFrag from './shaders/trianglesDistance.frag';
+import constants from './constants.js';
 
-let amountDim = 256;
+
+let amountDim = constants.amount;
 
 let renderer;
 let container;
@@ -25,7 +27,7 @@ let init = (_renderer, _camera) => {
 	container = exports.container = new THREE.Object3D();
 
 	color1 = new THREE.Color('#ffffff');
-	color2 = new THREE.Color('#ffffff');
+	color2 = new THREE.Color('#555555');
 
 	mesh = createTriangleMesh(_camera);
 	container.add(mesh);

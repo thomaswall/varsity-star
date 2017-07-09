@@ -4,6 +4,8 @@ import shaderParse from './parse.js';
 import nullShade from './shaders/null.vert';
 import nullFrag from './shaders/null.frag';
 import positionShade from './shaders/position.frag';
+import constants from './constants.js';
+
 
 let copyShader;
 let positionShader;
@@ -17,11 +19,12 @@ let scene;
 let camera;
 
 
-let amountDim = 256;
+let amountDim = constants.amount;
 
 let followPoint;
 let followPointTime = 0;
 let initAnimation = 0;
+let last_x = 0;
 
 
 let init = _renderer => {
@@ -128,7 +131,7 @@ let updatePosition = dt => {
 
 let update = dt => {
 
-	let r = 200;
+	let r = 520;
 	let h = 60;
 
 	let autoClearColor = renderer.autoClearColor;
@@ -145,14 +148,31 @@ let update = dt => {
 	positionShader.uniforms.speed.value = 1 * deltaRatio;
 	positionShader.uniforms.dieSpeed.value = 0.015 * deltaRatio;
 
+	
 	followPointTime += parseFloat(dt * 0.001 * 1);
-	followPoint.set(
-        Math.cos(followPointTime) * r,
-        Math.cos(followPointTime * 4.0) * h,
-        Math.sin(followPointTime * 2.0) * r
-    );
+	let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
 
-	positionShader.uniforms.mouse3d.value.lerp(followPoint, 0.2);
+	// followPoint.set(
+    //     Math.cos(followPointTime) * r,
+    //     Math.cos(followPointTime * 4.0) * h,
+    //     Math.sin(followPointTime * 2.0) * r
+    // );
+
+	let total_time = 1.0;
+	let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, 0, 0);
+	followPoint.set(
+		newPos.x,
+		newPos.y,
+		newPos.z
+	);
+
+	if(newPos.x < last_x) {
+		positionShader.uniforms.mouse3d.value.lerp(followPoint, 0.2);
+		last_x = newPos.x;
+	}
+	else {
+		positionShader.uniforms.mouse3d.value = followPoint;
+	}
 	updatePosition(dt);
 
 	renderer.autoClearColor = autoClearColor;

@@ -25,6 +25,7 @@ let followPoint;
 let followPointTime = 0;
 let initAnimation = 0;
 let last_x = 0;
+let yPos = 0;
 
 
 let init = _renderer => {
@@ -54,7 +55,7 @@ let init = _renderer => {
 			speed: { type: 'f', value: 1 },
             dieSpeed: { type: 'f', value: 0.015 },
             radius: { type: 'f', value: 0.6 },
-            curlSize: { type: 'f', value: 0.02 },
+            curlSize: { type: 'f', value: 0.04 },
             attraction: { type: 'f', value: 1 },
             time: { type: 'f', value: 5 },
             initAnimation: { type: 'f', value: 0 }
@@ -102,11 +103,7 @@ let createPositionTexture = () => {
 	}
 
 	let texture = new THREE.DataTexture(positions, amountDim, amountDim, THREE.RGBAFormat, THREE.FloatType);
-	texture.minFilter = THREE.NearestFilter;
-    texture.magFilter = THREE.NearestFilter;
     texture.needsUpdate = true;
-    texture.generateMipmaps = false;
-    texture.flipY = false;
 	textureDefaultPosition = texture;
 	return texture;
 }
@@ -132,7 +129,7 @@ let updatePosition = dt => {
 let update = dt => {
 
 	let r = 520;
-	let h = 60;
+	let h = 300;
 
 	let autoClearColor = renderer.autoClearColor;
 	let clearColor = renderer.getClearColor().getHex();
@@ -159,7 +156,7 @@ let update = dt => {
     // );
 
 	let total_time = 1.0;
-	let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, 0, 0);
+	let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, yPos, 0);
 	followPoint.set(
 		newPos.x,
 		newPos.y,
@@ -168,11 +165,12 @@ let update = dt => {
 
 	if(newPos.x < last_x) {
 		positionShader.uniforms.mouse3d.value.lerp(followPoint, 0.2);
-		last_x = newPos.x;
+		yPos = Math.random() * h * 2 - h;
 	}
 	else {
 		positionShader.uniforms.mouse3d.value = followPoint;
 	}
+	last_x = newPos.x;
 	updatePosition(dt);
 
 	renderer.autoClearColor = autoClearColor;

@@ -7,35 +7,29 @@ import positionShade from './shaders/position.frag';
 import constants from './constants.js';
 
 
-let copyShader;
-let positionShader;
 let textureDefaultPosition;
-let positionRenderTarget;
-let positionRenderTarget2;
 
 let renderer;
-let mesh;
-let scene;
-let camera;
+let copyShader;
 
 
 let amountDim = constants.amount;
 
 let followPoint;
 let followPointTime = 0;
-let initAnimation = 0;
-let last_x = 0;
-let yPos = 0;
+
+let simulations = [];
+
+let camera = new THREE.Camera();
 
 
-let init = _renderer => {
+let create = _renderer => {
 	renderer = _renderer;
-	followPoint = new THREE.Vector3();
+	let followPoint = new THREE.Vector3();
 
 	let rawShaderPrefix = 'precision ' + renderer.capabilities.precision + ' float;\n';
 
-	scene = new THREE.Scene();
-	camera = new THREE.Camera();
+	let scene = new THREE.Scene();
 	camera.position.z = 1;
 	copyShader = new THREE.RawShaderMaterial({
 		uniforms: {
@@ -46,7 +40,7 @@ let init = _renderer => {
         fragmentShader: rawShaderPrefix + shaderParse(glslify(nullFrag))
     });
 
-	positionShader = new THREE.RawShaderMaterial({
+	let positionShader = new THREE.RawShaderMaterial({
 		uniforms: {
 			resolution: {type: 'v2', value: new THREE.Vector2(amountDim, amountDim)},
 			texturePosition: {type: 't', value: undefined},
@@ -68,10 +62,10 @@ let init = _renderer => {
 		depthTest: false
 	});
 
-	mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), copyShader);
+	let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), copyShader);
 	scene.add(mesh);
 
-	positionRenderTarget = new THREE.WebGLRenderTarget(amountDim, amountDim, {
+	let positionRenderTarget = new THREE.WebGLRenderTarget(amountDim, amountDim, {
 		wrapS: THREE.ClampToEdgeWrapping,
         wrapT: THREE.ClampToEdgeWrapping,
         minFilter: THREE.NearestFilter,
@@ -83,9 +77,23 @@ let init = _renderer => {
         stencilBuffer: false
 	});
 
-	positionRenderTarget2 = positionRenderTarget.clone();
-	copyTexture(createPositionTexture(), positionRenderTarget);
-	copyTexture(positionRenderTarget, positionRenderTarget2);
+	let positionRenderTarget2 = positionRenderTarget.clone();
+	copyTexture(mesh, scene, createPositionTexture(), positionRenderTarget);
+	copyTexture(mesh, scene, positionRenderTarget, positionRenderTarget2);
+
+	let simulation = {
+		mesh,
+		positionRenderTarget,
+		positionRenderTarget2,
+		scene,
+		positionShader,
+		followPoint,
+		initAnimation: 0,
+		last_x: 0,
+		yPos: 0
+	};
+
+	simulations.push(simulation);
 }
 
 let createPositionTexture = () => {
@@ -108,78 +116,70 @@ let createPositionTexture = () => {
 	return texture;
 }
 
-let copyTexture = (input, output) => {
+let copyTexture = (mesh, scene, input, output) => {
 	mesh.material = copyShader;
 	copyShader.uniforms.texture.value = input.texture;
 	renderer.render(scene, camera, output);
 }
 
-let updatePosition = dt => {
-	let tmp = positionRenderTarget;
-	positionRenderTarget = positionRenderTarget2;
-	positionRenderTarget2 = tmp;
+let updatePosition = (dt, simulation) => {
+	let tmp = simulation.positionRenderTarget;
+	simulation.positionRenderTarget = simulation.positionRenderTarget2;
+	simulation.positionRenderTarget2 = tmp;
 
-	mesh.material = positionShader;
-	positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition;
-	positionShader.uniforms.texturePosition.value = positionRenderTarget2.texture;
-	positionShader.uniforms.time.value += dt * 0.001;
-	renderer.render(scene, camera, positionRenderTarget);
+	simulation.mesh.material = simulation.positionShader;
+	simulation.positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition;
+	simulation.positionShader.uniforms.texturePosition.value = simulation.positionRenderTarget2.texture;
+	simulation.positionShader.uniforms.time.value += dt * 0.001;
+	renderer.render(simulation.scene, camera, simulation.positionRenderTarget);
 }
 
 let update = dt => {
 
-	let r = 520;
-	let h = 300;
-
-	let autoClearColor = renderer.autoClearColor;
-	let clearColor = renderer.getClearColor().getHex();
-    let clearAlpha = renderer.getClearAlpha();
-
-    renderer.autoClearColor = false;
-
-	let deltaRatio = dt / 16.6667;
-
-	initAnimation = Math.min(initAnimation + dt * 0.00025, 1);
-	positionShader.uniforms.initAnimation.value = initAnimation;
-
-	positionShader.uniforms.speed.value = 1 * deltaRatio;
-	positionShader.uniforms.dieSpeed.value = 0.015 * deltaRatio;
-
-	
 	followPointTime += parseFloat(dt * 0.001 * 1);
-	let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
 
-	// followPoint.set(
-    //     Math.cos(followPointTime) * r,
-    //     Math.cos(followPointTime * 4.0) * h,
-    //     Math.sin(followPointTime * 2.0) * r
-    // );
+	for(let simulation of simulations) {
+		let r = 520;
+		let h = 300;
 
-	let total_time = 1.0;
-	let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, yPos, 0);
-	followPoint.set(
-		newPos.x,
-		newPos.y,
-		newPos.z
-	);
+		let autoClearColor = renderer.autoClearColor;
+		let clearColor = renderer.getClearColor().getHex();
+		let clearAlpha = renderer.getClearAlpha();
 
-	if(newPos.x < last_x) {
-		positionShader.uniforms.mouse3d.value.lerp(followPoint, 0.2);
-		yPos = Math.random() * h * 2 - h;
+		renderer.autoClearColor = false;
+
+		let deltaRatio = dt / 16.6667;
+
+		simulation.initAnimation = Math.min(simulation.initAnimation + dt * 0.00025, 1);
+		simulation.positionShader.uniforms.initAnimation.value = simulation.initAnimation;
+
+		simulation.positionShader.uniforms.speed.value = 1 * deltaRatio;
+		simulation.positionShader.uniforms.dieSpeed.value = 0.015 * deltaRatio;
+
+		let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
+
+		let total_time = 1.0;
+		let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, simulation.yPos, 0);
+		simulation.followPoint.set(
+			newPos.x,
+			newPos.y,
+			newPos.z
+		);
+
+		if(newPos.x < simulation.last_x) {
+			simulation.positionShader.uniforms.mouse3d.value.lerp(simulation.followPoint, 0.2);
+			simulation.yPos = Math.random() * h * 2 - h;
+		}
+		else {
+			simulation.positionShader.uniforms.mouse3d.value = simulation.followPoint;
+		}
+		simulation.last_x = newPos.x;
+		updatePosition(dt, simulation);
+
+		renderer.autoClearColor = autoClearColor;
 	}
-	else {
-		positionShader.uniforms.mouse3d.value = followPoint;
-	}
-	last_x = newPos.x;
-	updatePosition(dt);
-
-	renderer.autoClearColor = autoClearColor;
-
-	exports.positionRenderTarget = positionRenderTarget;
-	exports.prevPositionRenderTarget = positionRenderTarget2;
 }
 
-exports.positionRenderTarget2 = undefined;
-exports.positionRenderTarget = undefined;
-exports.init = init;
+exports.simulations = simulations;
+exports.create = create;
 exports.update = update;

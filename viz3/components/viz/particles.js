@@ -13,15 +13,16 @@ import constants from './constants.js';
 
 
 let amountDim = constants.amount;
+let simulations = simulate.simulations;
 
 let renderer;
 let container;
-let mesh;
+let meshes = [];
 
 let color1;
 let color2;
 
-let init = (_renderer, _camera) => {
+let create = (_renderer, _camera) => {
 	renderer = _renderer;
 
 	container = exports.container = new THREE.Object3D();
@@ -29,8 +30,15 @@ let init = (_renderer, _camera) => {
 	color1 = new THREE.Color('#ffffff');
 	color2 = new THREE.Color('#555555');
 
-	mesh = createTriangleMesh(_camera);
-	container.add(mesh);
+	let mesh = {
+        mesh: createTriangleMesh(_camera),
+        color1,
+        color2
+    };
+
+    meshes.push(mesh);
+
+	container.add(mesh.mesh);
 }
 
 let createTriangleMesh = (_camera) => {
@@ -153,16 +161,19 @@ let createTriangleMesh = (_camera) => {
 }
 
 let update = dt => {
-    mesh.material.uniforms.texturePosition.value = simulate.positionRenderTarget.texture;
-    mesh.customDistanceMaterial.uniforms.texturePosition.value = simulate.positionRenderTarget.texture;
-    mesh.motionMaterial.uniforms.texturePrevPosition.value = simulate.prevPositionRenderTarget.texture;
-    if(mesh.material.uniforms.flipRatio ) {
-        mesh.material.uniforms.flipRatio.value ^= 1;
-        mesh.customDistanceMaterial.uniforms.flipRatio.value ^= 1;
-        mesh.motionMaterial.uniforms.flipRatio.value ^= 1;
+    for(let i in meshes)
+    {
+        meshes[i].mesh.material.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
+        meshes[i].mesh.customDistanceMaterial.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
+        meshes[i].mesh.motionMaterial.uniforms.texturePrevPosition.value = simulations[i].positionRenderTarget2.texture;
+        if(meshes[i].mesh.material.uniforms.flipRatio ) {
+            meshes[i].mesh.material.uniforms.flipRatio.value ^= 1;
+            meshes[i].mesh.customDistanceMaterial.uniforms.flipRatio.value ^= 1;
+            meshes[i].mesh.motionMaterial.uniforms.flipRatio.value ^= 1;
+        }
     }
 }
 
 exports.container = container;
-exports.init = init;
+exports.create = create;
 exports.update = update;

@@ -38,8 +38,11 @@ export default class Viz extends Component {
     camera.position.set(0, 0, 700);
     console.log(camera.position);
 
-    simulate.init(renderer);
-    particles.init(renderer, camera);
+
+    for(let i = 0; i < 2; i++) {
+      simulate.create(renderer);
+      particles.create(renderer, camera);
+    }
     scene.add(particles.container);
 
     control = new OrbitControls( camera, renderer.domElement );

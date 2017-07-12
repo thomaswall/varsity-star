@@ -90,7 +90,8 @@ let create = _renderer => {
 		followPoint,
 		initAnimation: 0,
 		last_x: 0,
-		yPos: 0
+		yPos: 0,
+		offset: Math.random()*300
 	};
 
 	simulations.push(simulation);
@@ -159,7 +160,7 @@ let update = dt => {
 		let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
 
 		let total_time = 1.0;
-		let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2, simulation.yPos, 0);
+		let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2 - simulation.offset, simulation.yPos, 0);
 		simulation.followPoint.set(
 			newPos.x,
 			newPos.y,

@@ -9,6 +9,7 @@ uniform float curlSize;
 uniform float attraction;
 uniform float initAnimation;
 uniform vec3 mouse3d;
+uniform vec3 otherSims[10];
 
 vec4 mod289(vec4 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0;

@@ -1,4 +1,5 @@
 import THREE from "three";
+import uuid from 'uuid';
 import glslify from 'glslify';
 import shaderParse from './parse.js';
 import nullShade from './shaders/null.vert';
@@ -15,10 +16,13 @@ let copyShader;
 
 let amountDim = constants.amount;
 
+let MAX_SIMULATIONS = 10;
+
 let followPoint;
 let followPointTime = 0;
 
 let simulations = [];
+let locs = [];
 
 let camera = new THREE.Camera();
 
@@ -52,7 +56,8 @@ let create = _renderer => {
             curlSize: { type: 'f', value: 0.04 },
             attraction: { type: 'f', value: 1 },
             time: { type: 'f', value: 5 },
-            initAnimation: { type: 'f', value: 0 }
+            initAnimation: { type: 'f', value: 0 },
+			otherSims: { type: 'v3v', value: locs}
 		},
 		vertexShader: rawShaderPrefix + shaderParse(nullShade),
 		fragmentShader: rawShaderPrefix + shaderParse(positionShade),
@@ -91,7 +96,8 @@ let create = _renderer => {
 		initAnimation: 0,
 		last_x: 0,
 		yPos: 0,
-		offset: Math.random()*300
+		offset: Math.random()*300,
+		id: uuid()
 	};
 
 	simulations.push(simulation);
@@ -132,12 +138,17 @@ let updatePosition = (dt, simulation) => {
 	simulation.positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition;
 	simulation.positionShader.uniforms.texturePosition.value = simulation.positionRenderTarget2.texture;
 	simulation.positionShader.uniforms.time.value += dt * 0.001;
+	simulation.positionShader.uniforms.otherSims.value = locs;
 	renderer.render(simulation.scene, camera, simulation.positionRenderTarget);
 }
 
 let update = dt => {
 
 	followPointTime += parseFloat(dt * 0.001 * 1);
+	locs = simulations.reduce((total, sim) => total.concat(sim.followPoint), []);
+	for(let i = 0; i < simulations.length - MAX_SIMULATIONS; i++) {
+		locs.push(new THREE.Vector3(0,0,0));
+	}
 
 	for(let simulation of simulations) {
 		let r = 520;

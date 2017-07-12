@@ -39,7 +39,7 @@ export default class Viz extends Component {
     console.log(camera.position);
 
 
-    for(let i = 0; i < 2; i++) {
+    for(let i = 0; i < 10; i++) {
       simulate.create(renderer);
       particles.create(renderer, camera);
     }

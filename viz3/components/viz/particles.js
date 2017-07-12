@@ -16,7 +16,7 @@ let amountDim = constants.amount;
 let simulations = simulate.simulations;
 
 let renderer;
-let container;
+let container = exports.container = new THREE.Object3D();
 let meshes = [];
 
 let color1;
@@ -24,8 +24,6 @@ let color2;
 
 let create = (_renderer, _camera) => {
 	renderer = _renderer;
-
-	container = exports.container = new THREE.Object3D();
 
 	color1 = new THREE.Color('#ffffff');
 	color2 = new THREE.Color('#555555');

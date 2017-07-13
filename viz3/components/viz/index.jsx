@@ -28,6 +28,9 @@ export default class Viz extends Component {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    window.onresize = () => renderer.setSize(window.innerWidth, window.innerHeight);
+
     renderer.setClearColor("#343434");
     document.body.appendChild(renderer.domElement);
 

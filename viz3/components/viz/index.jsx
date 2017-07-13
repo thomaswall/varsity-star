@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import THREE from 'three'
 import simulate from './simulate.js'
 import particles from './particles.js'
+import * as cube from './cube'
 import OrbitControls from './controls.js';
 import constants from './constants.js';
 
@@ -43,7 +44,10 @@ export default class Viz extends Component {
       simulate.create(renderer);
       particles.create(renderer, camera);
     }
+    cube.create(renderer, camera);
+
     scene.add(particles.container);
+    scene.add(cube.container);
 
     control = new OrbitControls( camera, renderer.domElement );
     control.target.y = 50;

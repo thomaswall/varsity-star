@@ -13,11 +13,15 @@ attribute vec2 uv;
 attribute vec2 uv2;
 */
 
+uniform int ticks;
+uniform float melt;
+attribute float displacement;
 varying vec3 _position;
 
 void main() {
 
 	_position = position;
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	vec3 perturbed = position + (normal * displacement);
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( perturbed, 1.0 );
 
 }

@@ -68,6 +68,7 @@ export default class Viz extends Component {
     camera.updateMatrixWorld();
     simulate.update(dt);
     particles.update(dt);
+    cube.update(dt);
 
     renderer.render( scene, camera );
     requestAnimationFrame( this.animate );
@@ -81,8 +82,12 @@ export default class Viz extends Component {
     let key = event.keyCode;
     console.log(key);
 
-    if(key == 13)
+    if(key == 13) // enter
       constants.particleRestart = Date.now();
+
+    if(key == 77) { // m for MELT
+      cube.toggle_melt();
+    } 
   }
 
 

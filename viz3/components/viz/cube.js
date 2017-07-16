@@ -7,7 +7,7 @@ let mesh;
 let ticks = 0;
 let melt = false;
 
-const amplitude = 20;
+const amplitude = 30;
 
 export let container = new THREE.Object3D();
 
@@ -32,7 +32,7 @@ export const create = (_renderer, _camera) => {
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
 		side: THREE.DoubleSide,
-		wireframe: true,
+		wireframe: false,
 		vertexColors: THREE.FaceColors,
 		wireframeLinewidth: 5,
 		uniforms: {
@@ -53,6 +53,11 @@ export const create = (_renderer, _camera) => {
 
 	container.add(mesh);
 
+}
+
+export const toggle_wireframe = () => {
+	mesh.material.wireframe = !mesh.material.wireframe;
+	mesh.material.needsUpdate = true;
 }
 
 export const toggle_melt = () => {

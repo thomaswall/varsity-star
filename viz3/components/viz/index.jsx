@@ -91,6 +91,10 @@ export default class Viz extends Component {
     if(key == 77) { // m for MELT
       cube.toggle_melt();
     } 
+
+    if(key == 87) { // w for wireframe
+      cube.toggle_wireframe();
+    }
     
     if(key == 78) {
       simulate.create(renderer);

@@ -6,6 +6,9 @@ let renderer;
 let mesh;
 let ticks = 0;
 let melt = false;
+
+const amplitude = 20;
+
 export let container = new THREE.Object3D();
 
 let displacement;
@@ -19,18 +22,18 @@ export const create = (_renderer, _camera) => {
 	noise        = new Float32Array(geometry.attributes.position.count);
 
 	for(let i = 0; i < displacement.length; i++) {
-		noise[i] = (.5 - Math.random()) * 5;
+		noise[i] = (.5 - Math.random()) * amplitude;
 		displacement[i] = 0;
 	}
 
 	geometry.addAttribute('displacement', new THREE.BufferAttribute(displacement, 1));
-
 
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
 		side: THREE.DoubleSide,
 		wireframe: true,
+		vertexColors: THREE.FaceColors,
 		wireframeLinewidth: 5,
 		uniforms: {
 			ticks: { value: ticks },
@@ -39,11 +42,14 @@ export const create = (_renderer, _camera) => {
 		}
 	})
 
-	console.log(geometry);
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.position.x = 0;
 	mesh.position.y = 0;
 	mesh.position.z = 0;
+
+	console.log(material);
+	console.log(geometry);
+	console.log(mesh);
 
 	container.add(mesh);
 
@@ -71,8 +77,8 @@ export const update = dt => {
 			// force noise to tend towards 0 if we are near max displacement
 			// alternatively if we want to super melt, we can flip the subtraction to a plus....
 			// lot of shit to play around with. super melt is great
-			if(Math.abs(displacement[i])/20.0 > 0.3) {
-				noise[i] +=  1.0 * (Math.random() - (5.0 + noise[i])/10.0);
+			if(Math.abs(displacement[i])/(2 * amplitude) > 0.3) {
+				noise[i] +=  1.0 * (Math.random() - (amplitude + noise[i])/(2 * amplitude));
 			}
 			else {
 				noise[i] += Math.random() - 0.5;

@@ -16,7 +16,7 @@ let copyShader;
 
 let amountDim = constants.amount;
 
-let MAX_SIMULATIONS = 10;
+let MAX_SIMULATIONS = 30;
 
 let followPoint;
 let followPointTime = 0;
@@ -50,11 +50,12 @@ let create = _renderer => {
 			texturePosition: {type: 't', value: undefined},
 			textureDefaultPosition: {type: 't', value: undefined},
 			mouse3d: { type: 'v3', value: new THREE.Vector3 },
-			speed: { type: 'f', value: 3.0 },
-            dieSpeed: { type: 'f', value: 0.015 },
-            radius: { type: 'f', value: 0.7 },
-            curlSize: { type: 'f', value: 0.04 },
-            attraction: { type: 'f', value: 1 },
+			speed: { type: 'f', value: constants.settings.speed },
+            dieSpeed: { type: 'f', value: constants.settings.dieSpeed },
+            radius: { type: 'f', value: constants.settings.radius },
+            curlSize: { type: 'f', value: constants.settings.curlSize },
+            attraction: { type: 'f', value: constants.settings.attraction },
+			fire: {type: 'f', value: constants.settings.fire },
             time: { type: 'f', value: 5 },
             initAnimation: { type: 'f', value: 0 },
 			otherSims: { type: 'v3v', value: locs}
@@ -103,6 +104,10 @@ let create = _renderer => {
 	simulations.push(simulation);
 }
 
+let deleteIt = () => {
+	simulations.shift();
+}
+
 let createPositionTexture = () => {
 	let positions = new Float32Array(amountDim * amountDim * 4);
 	let index, r, phi, theta;
@@ -146,11 +151,12 @@ let update = dt => {
 
 	followPointTime += parseFloat(dt * 0.001 * 1);
 	locs = simulations.reduce((total, sim) => total.concat(sim.followPoint), []);
-	for(let i = 0; i < simulations.length - MAX_SIMULATIONS; i++) {
+	for(let i = 0; i < MAX_SIMULATIONS - simulations.length; i++) {
 		locs.push(new THREE.Vector3(0,0,0));
 	}
 
 	for(let simulation of simulations) {
+		
 		let r = 520;
 		let h = 300;
 
@@ -165,12 +171,16 @@ let update = dt => {
 		simulation.initAnimation = Math.min(simulation.initAnimation + dt * 0.00025, 1);
 		simulation.positionShader.uniforms.initAnimation.value = simulation.initAnimation;
 
-		simulation.positionShader.uniforms.speed.value = 1 * deltaRatio;
-		simulation.positionShader.uniforms.dieSpeed.value = 0.015 * deltaRatio;
+		simulation.positionShader.uniforms.speed.value = constants.settings.speed * deltaRatio;
+		simulation.positionShader.uniforms.dieSpeed.value = constants.settings.dieSpeed * deltaRatio;
+		simulation.positionShader.uniforms.radius.value = constants.settings.radius;
+		simulation.positionShader.uniforms.curlSize.value = constants.settings.curlSize;
+		simulation.positionShader.uniforms.attraction.value = constants.settings.attraction;
+		simulation.positionShader.uniforms.fire.value = constants.settings.fire;
 
 		let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
 
-		let total_time = 3.0;
+		let total_time = constants.settings.total_time;
 		let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2 - simulation.offset, simulation.yPos, 0);
 		simulation.followPoint.set(
 			newPos.x,
@@ -194,4 +204,5 @@ let update = dt => {
 
 exports.simulations = simulations;
 exports.create = create;
+exports.deleteIt = deleteIt;
 exports.update = update;

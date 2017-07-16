@@ -16,11 +16,14 @@ attribute vec2 uv2;
 uniform int ticks;
 uniform float melt;
 attribute float displacement;
+varying float _displacement;
+
 varying vec3 _position;
 
 void main() {
 
 	_position = position;
+	_displacement = displacement;
 	vec3 perturbed = position + (normal * displacement);
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( perturbed, 1.0 );
 

@@ -7,9 +7,10 @@ uniform float dieSpeed;
 uniform float radius;
 uniform float curlSize;
 uniform float attraction;
+uniform float fire;
 uniform float initAnimation;
 uniform vec3 mouse3d;
-uniform vec3 otherSims[10];
+uniform vec3 otherSims[30];
 
 vec4 mod289(vec4 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -142,10 +143,6 @@ vec3 curl( in vec3 p, in float noiseTime, in float persistence ) {
 
 }
 
-float gauss(in vec3 p) {
-    return exp(-20.0*pow(p.x - sin(0.27 *time), 2.0) - 20.0*pow(p.y - cos(0.37 * time), 2.0) - 2.0*pow(p.z - sin(0.37 * time), 2.0));
-}
-
 void main() {
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -155,12 +152,19 @@ void main() {
     float life = positionInfo.a - dieSpeed;
 
     vec3 currPos = mouse3d;
+    float dist = 100000000.0;
 
-    //for(int i = 0; i < 10; i++) {
-    //    if(mouse3d.x != otherSims[i].x && mouse3d.y != otherSims[i].y) {
-    //        currPos += vec3(mouse3d.x, otherSims[i].y - mouse3d.y, mouse3d.z) / 9.0;
-    //    }
-    //}
+    for(int i = 0; i < 10; i++) {
+        if(mouse3d.x != otherSims[i].x
+            && mouse3d.y != otherSims[i].y
+            && otherSims[i].x + otherSims[i].y + otherSims[i].z != 0.0
+            && distance(otherSims[i], position) < distance(mouse3d, position)
+            && distance(otherSims[i], currPos) < dist) {
+            dist = distance(otherSims[i], currPos);
+            currPos = otherSims[i];
+            //currPos += vec3(mouse3d.x, otherSims[i].y - mouse3d.y, mouse3d.z) / 9.0;
+        }
+    }
 
     vec3 followPosition = mix(vec3(0.0, -(1.0 - initAnimation) * 200.0, 0.0), currPos, smoothstep(0.2, 0.7, initAnimation));
 
@@ -179,14 +183,12 @@ void main() {
 
         //gaussian        
         vec3 target = 0.5 + 0.4 * vec3(cos(0.24 * time), sin(0.31 * time), sin(0.3 * time));
-        target = normalize(position) - target;
+        if(fire > 0.0)
+            target = normalize(delta) - target;
+        else
+            target = normalize(position) - target;
         target = 100.0 * vec3(-1.0, 1.0, 1.0) * target * exp(-1.0 * dot(target, target));
         position += curl(target * curlSize, time, 0.1 + (1.0 - life) * 0.1) *speed / 2.0;
-
-        target = 0.5 + 0.4 * vec3(cos(0.27 * time), sin(0.37 * time), sin(0.3 * time));
-        target = normalize(position) - target;
-        target = 100.0 * vec3(-1.0, 1.0, 1.0) * target * exp(-1.0 * dot(target, target));
-        //temp += curl(target * curlSize, time, 0.1 + (1.0 - life) * 0.1) *speed / 2.0;
 
         //position = temp;
     }

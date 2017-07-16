@@ -79,6 +79,18 @@ export default class Viz extends Component {
 
     if(key == 13)
       constants.particleRestart = Date.now();
+    
+    if(key == 78) {
+      simulate.create(renderer);
+      particles.create(renderer, camera);
+      constants.particleRestart = Date.now();
+    }
+
+    if(key == 68) {
+      simulate.deleteIt();
+      particles.deleteIt();
+    }
+
   }
 
 

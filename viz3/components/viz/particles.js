@@ -39,6 +39,12 @@ let create = (_renderer, _camera) => {
 	container.add(mesh.mesh);
 }
 
+let deleteIt = () => {
+    let mesh = meshes[0];
+    container.remove(mesh.mesh);
+    meshes.shift();
+}
+
 let createTriangleMesh = (_camera) => {
 	let position = new Float32Array(amountDim * amountDim * 3 * 3);
 	let positionFlip = new Float32Array(amountDim * amountDim * 3 * 3);
@@ -174,4 +180,5 @@ let update = dt => {
 
 exports.container = container;
 exports.create = create;
+exports.deleteIt = deleteIt;
 exports.update = update;

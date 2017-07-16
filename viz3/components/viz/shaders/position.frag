@@ -142,6 +142,10 @@ vec3 curl( in vec3 p, in float noiseTime, in float persistence ) {
 
 }
 
+float gauss(in vec3 p) {
+    return exp(-20.0*pow(p.x - sin(0.27 *time), 2.0) - 20.0*pow(p.y - cos(0.37 * time), 2.0) - 2.0*pow(p.z - sin(0.37 * time), 2.0));
+}
+
 void main() {
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -150,8 +154,19 @@ void main() {
     vec3 position = mix(vec3(0.0, -200.0, 0.0), positionInfo.xyz, smoothstep(0.0, 0.3, initAnimation));
     float life = positionInfo.a - dieSpeed;
 
-    vec3 followPosition = mix(vec3(0.0, -(1.0 - initAnimation) * 200.0, 0.0), mouse3d, smoothstep(0.2, 0.7, initAnimation));
+    vec3 currPos = mouse3d;
 
+    //for(int i = 0; i < 10; i++) {
+    //    if(mouse3d.x != otherSims[i].x && mouse3d.y != otherSims[i].y) {
+    //        currPos += vec3(mouse3d.x, otherSims[i].y - mouse3d.y, mouse3d.z) / 9.0;
+    //    }
+    //}
+
+    vec3 followPosition = mix(vec3(0.0, -(1.0 - initAnimation) * 200.0, 0.0), currPos, smoothstep(0.2, 0.7, initAnimation));
+
+
+    vec3 temp = position;
+    
     if(life < 0.0) {
         positionInfo = texture2D( textureDefaultPosition, uv );
         position = positionInfo.xyz * (1.0 + sin(time * 15.0) * 0.2 + (1.0 - initAnimation)) * 0.4 * radius;
@@ -160,7 +175,20 @@ void main() {
     } else {
         vec3 delta = followPosition - position;
         position += delta * (0.005 + life * 0.01) * attraction * (1.0 - smoothstep(50.0, 350.0, length(delta))) *speed;
-        position += curl(position * curlSize, time, 0.1 + (1.0 - life) * 0.1) *speed;
+        position += curl(position * curlSize / 1.5, time, 0.1 + (1.0 - life) * 0.1) *speed / 2.0;
+
+        //gaussian        
+        vec3 target = 0.5 + 0.4 * vec3(cos(0.24 * time), sin(0.31 * time), sin(0.3 * time));
+        target = normalize(position) - target;
+        target = 100.0 * vec3(-1.0, 1.0, 1.0) * target * exp(-1.0 * dot(target, target));
+        position += curl(target * curlSize, time, 0.1 + (1.0 - life) * 0.1) *speed / 2.0;
+
+        target = 0.5 + 0.4 * vec3(cos(0.27 * time), sin(0.37 * time), sin(0.3 * time));
+        target = normalize(position) - target;
+        target = 100.0 * vec3(-1.0, 1.0, 1.0) * target * exp(-1.0 * dot(target, target));
+        //temp += curl(target * curlSize, time, 0.1 + (1.0 - life) * 0.1) *speed / 2.0;
+
+        //position = temp;
     }
 
     gl_FragColor = vec4(position, life);

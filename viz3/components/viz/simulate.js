@@ -50,9 +50,9 @@ let create = _renderer => {
 			texturePosition: {type: 't', value: undefined},
 			textureDefaultPosition: {type: 't', value: undefined},
 			mouse3d: { type: 'v3', value: new THREE.Vector3 },
-			speed: { type: 'f', value: 1 },
+			speed: { type: 'f', value: 3.0 },
             dieSpeed: { type: 'f', value: 0.015 },
-            radius: { type: 'f', value: 0.6 },
+            radius: { type: 'f', value: 0.7 },
             curlSize: { type: 'f', value: 0.04 },
             attraction: { type: 'f', value: 1 },
             time: { type: 'f', value: 5 },
@@ -170,7 +170,7 @@ let update = dt => {
 
 		let sinceRestart = (Date.now() - constants.particleRestart) * 0.001;
 
-		let total_time = 1.0;
+		let total_time = 3.0;
 		let newPos = new THREE.Vector3(-r + sinceRestart / total_time * r *2 - simulation.offset, simulation.yPos, 0);
 		simulation.followPoint.set(
 			newPos.x,

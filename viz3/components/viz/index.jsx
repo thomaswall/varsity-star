@@ -103,6 +103,10 @@ export default class Viz extends Component {
       particles.deleteIt();
     }
 
+    if(key == 49)
+      constants.phase = 0;
+    if(key == 50)
+      constants.phase = 1;
   }
 
 

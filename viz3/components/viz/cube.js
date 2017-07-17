@@ -78,7 +78,6 @@ export const toggle_melt = () => {
 
 	melt = !melt;
 	mesh.geometry.attributes.displacement.needsUpdate = true;
-
 }
 
 export const update = dt => {

@@ -19,7 +19,8 @@ export let phase = 0;
 
 export const colors = [
     new THREE.Vector4(0.0, 0.77647, 1.0, 1.0),
-    new THREE.Vector4(1.0, 1.0, 1.0, 1.0)
+    new THREE.Vector4(1.0, 1.0, 1.0, 1.0),
+    new THREE.Vector4(144.0/255.0, 107.0/255.0, 181.0/255.0, 1.0)
 ]
 
 export let current_index = 0;
@@ -30,13 +31,9 @@ export const melt_transition_time = 10;
 
 export const tick = () => ticks += 1;
 export const set_color = index => {
-    if(index >= colors.length) {
-        console.log("WARNING: trying to set colors too big");
-        return;
-    }
+    index = index % colors.length;
 
     prev_index = current_index;
     current_index = index;
     color_change_tick = ticks;
-    console.log(ticks);
 }

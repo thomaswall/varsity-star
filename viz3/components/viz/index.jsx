@@ -96,10 +96,7 @@ export default class Viz extends Component {
     }
 
     if(key == 67) { // c for color
-      if(constants.current_index == 0)
-        constants.set_color(1);
-      else
-        constants.set_color(0);
+      constants.set_color(constants.current_index + 1)
     }
     
     if(key == 78) {

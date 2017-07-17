@@ -9,7 +9,7 @@ import triangles from './shaders/triangles.vert';
 import trianglesFrag from './shaders/triangles.frag';
 import trianglesDistance from './shaders/trianglesDistance.vert';
 import trianglesDistanceFrag from './shaders/trianglesDistance.frag';
-import constants from './constants.js';
+import * as constants from './constants.js';
 
 
 let amountDim = constants.amount;

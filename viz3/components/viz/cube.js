@@ -1,6 +1,7 @@
 import THREE from 'three';
 import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
+import * as constants from './constants';
 
 let renderer;
 let mesh;
@@ -28,6 +29,8 @@ export const create = (_renderer, _camera) => {
 
 	geometry.addAttribute('displacement', new THREE.BufferAttribute(displacement, 1));
 
+	console.log(constants)
+	console.log("hello", constants.colors[constants.current_index]);
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
@@ -38,9 +41,11 @@ export const create = (_renderer, _camera) => {
 		uniforms: {
 			ticks: { value: ticks },
 			boomTick: { value: -1 },
-			melt: { value: 0 }
+			melt: { value: 0 },
+			_color: new THREE.Uniform(constants.colors[constants.current_index])
 		}
 	})
+	console.log(material.uniforms._color);
 
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.position.x = 0;
@@ -76,6 +81,7 @@ export const update = dt => {
 
 	mesh.material.uniforms.ticks.value = ticks;
 	mesh.material.uniforms.melt.value = melt ? 1 : 0;
+	mesh.material.uniforms._color = new THREE.Uniform(constants.colors[constants.current_index]);
 
 	if(melt) {
 		for(let i = 0; i < displacement.length; i++) {

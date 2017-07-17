@@ -1,8 +1,10 @@
-let amount = 512;
-let particleRestart = 0;
-let timeStart = Date.now();
+import THREE from 'three';
 
-let settings = {
+export let amount = 512;
+export let particleRestart = 0;
+export let timeStart = Date.now();
+
+export let settings = {
     speed: 2.0,
     dieSpeed: 0.015,
     radius: 0.7,
@@ -12,10 +14,19 @@ let settings = {
     total_time: 3.0
 }
 
-let phase = 0;
+export let phase = 0;
 
-exports.amount = amount;
-exports.particleRestart = particleRestart;
-exports.timeStart = timeStart;
-exports.settings = settings;
-exports.phase = phase;
+export const colors = [
+    new THREE.Vector4(0.0, 0.77647, 1.0, 1.0),
+    new THREE.Vector4(1.0, 1.0, 1.0, 1.0)
+]
+
+export let current_index = 0;
+export let prev_index = 0;
+export let color_change_time = Date.now();
+
+export const set_color = index => {
+    prev_index = current_index;
+    current_index = index;
+    color_change_time = Date.now();
+}

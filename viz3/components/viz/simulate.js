@@ -5,7 +5,7 @@ import shaderParse from './parse.js';
 import nullShade from './shaders/null.vert';
 import nullFrag from './shaders/null.frag';
 import positionShade from './shaders/position.frag';
-import constants from './constants.js';
+import * as constants from './constants.js';
 
 
 let textureDefaultPosition;

@@ -5,9 +5,13 @@ uniform vec3 cameraPosition;
 
 */
 
+uniform float melt;
+
+uniform vec4 _color;
+uniform vec4 _prev_color;
+
 varying vec3 _position;
 varying float _displacement;
-varying float _melt;
 
 void main() {
 
@@ -17,7 +21,8 @@ void main() {
 	float max_displacement = 300.0;
 	float norm_displacement = clamp((1.0 + (-1.0 * _displacement / max_displacement))/2.0, 0.0, 1.0); 
 
-	gl_FragColor = norm_displacement * vec4(0, 198.0/255.0, 1.0, 1.0);
+	//gl_FragColor = norm_displacement * vec4(0, 198.0/255.0, 1.0, 1.0);
+	gl_FragColor = norm_displacement * _color; 
 
 	//gl_FragColor = vec4(_color, 1.0);
 

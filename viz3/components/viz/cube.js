@@ -28,8 +28,6 @@ export const create = (_renderer, _camera) => {
 
 	geometry.addAttribute('displacement', new THREE.BufferAttribute(displacement, 1));
 
-	console.log(constants)
-	console.log("hello", constants.colors[constants.current_index]);
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
@@ -41,13 +39,14 @@ export const create = (_renderer, _camera) => {
 			ticks: { value: constants.ticks },
 			boomTick: { value: -1 },
 			melt: { value: 0 },
+			melt_off_tick: { value: -1 },
+			melt_transition_time: { value: constants.melt_transition_time },
 			color_change_tick: { value: constants.color_change_tick },
 			color_transition_time: { value: constants.color_transition_time },
 			_color: new THREE.Uniform(constants.colors[constants.current_index]),
 			_prev_color: new THREE.Uniform(constants.colors[constants.prev_index])
 		}
 	})
-	console.log(material.uniforms._color);
 
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.position.x = 0;
@@ -68,20 +67,26 @@ export const toggle_wireframe = () => {
 }
 
 export const toggle_melt = () => {
-	melt = !melt;
-	for(let i = 0; i < displacement.length; i++) {
-		displacement[i] = 0;
+	if(!melt) {
+		for(let i = 0; i < displacement.length; i++) {
+			displacement[i] = 0;
+		}
 	}
+	else {
+		mesh.material.uniforms.melt_off_tick.value = constants.ticks;
+	}
+
+	melt = !melt;
 	mesh.geometry.attributes.displacement.needsUpdate = true;
 
 }
 
 export const update = dt => {
+
 	constants.tick();
 	mesh.rotation.x += 0.002;
 	mesh.rotation.z += .002;
 
-	console.log(constants.color_change_tick);
 	mesh.material.uniforms.ticks.value = constants.ticks;
 	mesh.material.uniforms.melt.value = melt ? 1 : 0;
 	mesh.material.uniforms._color = new THREE.Uniform(constants.colors[constants.current_index]);

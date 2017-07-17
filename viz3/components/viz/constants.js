@@ -26,6 +26,7 @@ export let current_index = 0;
 export let prev_index = 0;
 export let color_change_tick = 0;
 export const color_transition_time = 30; // 30 ticks
+export const melt_transition_time = 10;
 
 export const tick = () => ticks += 1;
 export const set_color = index => {

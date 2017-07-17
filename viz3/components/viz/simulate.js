@@ -192,6 +192,14 @@ let update = dt => {
 			simulation.positionShader.uniforms.mouse3d.value.lerp(simulation.followPoint, 0.2);
 			simulation.yPos = Math.random() * h * 2 - h;
 		}
+		else if(constants.phase == 1){
+			simulation.followPoint.set(
+				Math.cos(sinceRestart + simulation.offset) * 200,
+				Math.sin(sinceRestart + simulation.offset) * 200,
+				0
+			);
+			simulation.positionShader.uniforms.mouse3d.value.lerp(simulation.followPoint, 0.2);
+		}
 		else {
 			simulation.positionShader.uniforms.mouse3d.value = simulation.followPoint;
 		}

@@ -12,7 +12,10 @@ let settings = {
     total_time: 3.0
 }
 
+let phase = 0;
+
 exports.amount = amount;
 exports.particleRestart = particleRestart;
 exports.timeStart = timeStart;
 exports.settings = settings;
+exports.phase = phase;

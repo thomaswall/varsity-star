@@ -24,8 +24,6 @@ void main() {
 	float max_displacement = 300.0;
 	float norm_displacement = clamp((1.0 + (-1.0 * _displacement / max_displacement))/2.0, 0.0, 1.0); 
 
-	//gl_FragColor = norm_displacement * vec4(0, 198.0/255.0, 1.0, 1.0);
-
 	if(ticks - color_change_tick < color_transition_time) {
 		float ipl = (ticks - color_change_tick)/color_transition_time;
 		gl_FragColor = norm_displacement * (ipl * _color +  (1.0 - ipl) * _prev_color);

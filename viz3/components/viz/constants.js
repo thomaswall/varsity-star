@@ -29,6 +29,11 @@ export const color_transition_time = 30; // 30 ticks
 
 export const tick = () => ticks += 1;
 export const set_color = index => {
+    if(index >= colors.length) {
+        console.log("WARNING: trying to set colors too big");
+        return;
+    }
+
     prev_index = current_index;
     current_index = index;
     color_change_tick = ticks;

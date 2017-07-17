@@ -16,7 +16,7 @@ attribute vec2 uv2;
 uniform vec4 _color;
 uniform vec4 _prev_color;
 
-uniform int ticks;
+uniform float ticks;
 uniform float melt;
 attribute float displacement;
 varying float _displacement;

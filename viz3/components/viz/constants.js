@@ -3,6 +3,7 @@ import THREE from 'three';
 export let amount = 512;
 export let particleRestart = 0;
 export let timeStart = Date.now();
+export let ticks = 0;
 
 export let settings = {
     speed: 2.0,
@@ -23,10 +24,13 @@ export const colors = [
 
 export let current_index = 0;
 export let prev_index = 0;
-export let color_change_time = Date.now();
+export let color_change_tick = 0;
+export const color_transition_time = 30; // 30 ticks
 
+export const tick = () => ticks += 1;
 export const set_color = index => {
     prev_index = current_index;
     current_index = index;
-    color_change_time = Date.now();
+    color_change_tick = ticks;
+    console.log(ticks);
 }

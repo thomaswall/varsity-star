@@ -12,6 +12,8 @@ let settings = {
     total_time: 3.0
 }
 
+let colors = ["#ffffff","#555555"];
+
 let phase = 0;
 
 exports.amount = amount;
@@ -19,3 +21,4 @@ exports.particleRestart = particleRestart;
 exports.timeStart = timeStart;
 exports.settings = settings;
 exports.phase = phase;
+exports.colors = colors;

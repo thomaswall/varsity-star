@@ -25,8 +25,8 @@ let color2;
 let create = (_renderer, _camera) => {
 	renderer = _renderer;
 
-	color1 = new THREE.Color('#ffffff');
-	color2 = new THREE.Color('#555555');
+	color1 = new THREE.Color(constants.colors[0]);
+	color2 = new THREE.Color(constants.colors[1]);
 
 	let mesh = {
         mesh: createTriangleMesh(_camera),
@@ -40,9 +40,11 @@ let create = (_renderer, _camera) => {
 }
 
 let deleteIt = () => {
-    let mesh = meshes[0];
-    container.remove(mesh.mesh);
-    meshes.shift();
+    if(meshes.length) {
+        let mesh = meshes[0];
+        container.remove(mesh.mesh);
+        meshes.shift();
+    }
 }
 
 let createTriangleMesh = (_camera) => {

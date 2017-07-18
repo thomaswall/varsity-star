@@ -84,13 +84,15 @@ let create = _renderer => {
 	});
 
 	let positionRenderTarget2 = positionRenderTarget.clone();
-	copyTexture(mesh, scene, createPositionTexture(), positionRenderTarget);
+	let newTexture = createPositionTexture();
+	copyTexture(mesh, scene, newTexture, positionRenderTarget);
 	copyTexture(mesh, scene, positionRenderTarget, positionRenderTarget2);
 
 	let simulation = {
 		mesh,
 		positionRenderTarget,
 		positionRenderTarget2,
+		textureDefaultPosition: newTexture,
 		scene,
 		positionShader,
 		followPoint,
@@ -105,7 +107,8 @@ let create = _renderer => {
 }
 
 let deleteIt = () => {
-	simulations.shift();
+	if(simulations.length)
+		simulations.shift();
 }
 
 let createPositionTexture = () => {
@@ -140,7 +143,7 @@ let updatePosition = (dt, simulation) => {
 	simulation.positionRenderTarget2 = tmp;
 
 	simulation.mesh.material = simulation.positionShader;
-	simulation.positionShader.uniforms.textureDefaultPosition.value = textureDefaultPosition;
+	simulation.positionShader.uniforms.textureDefaultPosition.value = simulation.textureDefaultPosition;
 	simulation.positionShader.uniforms.texturePosition.value = simulation.positionRenderTarget2.texture;
 	simulation.positionShader.uniforms.time.value += dt * 0.001;
 	simulation.positionShader.uniforms.otherSims.value = locs;

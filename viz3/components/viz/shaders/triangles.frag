@@ -8,7 +8,7 @@ uniform vec3 color2;
 
 void main() {
 
-    vec3 outgoingLight = mix(color2, color1, smoothstep(0.0, 0.7, vLife));
+    vec3 outgoingLight = mix(color2, color1, smoothstep(0.0, 0.8, vLife));
 
     //outgoingLight *= shadowMask;//pow(shadowMask, vec3(0.75));
 

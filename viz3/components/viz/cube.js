@@ -1,10 +1,10 @@
 import THREE from 'three';
 import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
+import * as constants from './constants';
 
 let renderer;
 let mesh;
-let ticks = 0;
 let melt = false;
 
 const amplitude = 30;
@@ -36,9 +36,15 @@ export const create = (_renderer, _camera) => {
 		vertexColors: THREE.FaceColors,
 		wireframeLinewidth: 5,
 		uniforms: {
-			ticks: { value: ticks },
+			ticks: { value: constants.ticks },
 			boomTick: { value: -1 },
-			melt: { value: 0 }
+			melt: { value: 0 },
+			melt_off_tick: { value: -1 },
+			melt_transition_time: { value: constants.melt_transition_time },
+			color_change_tick: { value: constants.color_change_tick },
+			color_transition_time: { value: constants.color_transition_time },
+			_color: new THREE.Uniform(constants.colors[constants.current_index]),
+			_prev_color: new THREE.Uniform(constants.colors[constants.prev_index])
 		}
 	})
 
@@ -61,21 +67,30 @@ export const toggle_wireframe = () => {
 }
 
 export const toggle_melt = () => {
-	melt = !melt;
-	for(let i = 0; i < displacement.length; i++) {
-		displacement[i] = 0;
+	if(!melt) {
+		for(let i = 0; i < displacement.length; i++) {
+			displacement[i] = 0;
+		}
 	}
-	mesh.geometry.attributes.displacement.needsUpdate = true;
+	else {
+		mesh.material.uniforms.melt_off_tick.value = constants.ticks;
+	}
 
+	melt = !melt;
+	mesh.geometry.attributes.displacement.needsUpdate = true;
 }
 
 export const update = dt => {
-	ticks += 1;
+
+	constants.tick();
 	mesh.rotation.x += 0.002;
 	mesh.rotation.z += .002;
 
-	mesh.material.uniforms.ticks.value = ticks;
+	mesh.material.uniforms.ticks.value = constants.ticks;
 	mesh.material.uniforms.melt.value = melt ? 1 : 0;
+	mesh.material.uniforms._color = new THREE.Uniform(constants.colors[constants.current_index]);
+	mesh.material.uniforms._prev_color = new THREE.Uniform(constants.colors[constants.prev_index]);
+	mesh.material.uniforms.color_change_tick.value = constants.color_change_tick;
 
 	if(melt) {
 		for(let i = 0; i < displacement.length; i++) {

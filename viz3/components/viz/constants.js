@@ -1,8 +1,11 @@
-let amount = 512;
-let particleRestart = 0;
-let timeStart = Date.now();
+import THREE from 'three';
 
-let settings = {
+export let amount = 512;
+export let particleRestart = 0;
+export let timeStart = Date.now();
+export let ticks = 0;
+
+export let settings = {
     speed: 2.0,
     dieSpeed: 0.015,
     radius: 0.7,
@@ -12,13 +15,25 @@ let settings = {
     total_time: 3.0
 }
 
-let colors = ["#ffffff","#555555"];
+export let phase = 0;
 
-let phase = 0;
+export const colors = [
+    new THREE.Vector4(0.0, 0.77647, 1.0, 1.0),
+    new THREE.Vector4(1.0, 1.0, 1.0, 1.0),
+    new THREE.Vector4(144.0/255.0, 107.0/255.0, 181.0/255.0, 1.0)
+]
 
-exports.amount = amount;
-exports.particleRestart = particleRestart;
-exports.timeStart = timeStart;
-exports.settings = settings;
-exports.phase = phase;
-exports.colors = colors;
+export let current_index = 0;
+export let prev_index = 0;
+export let color_change_tick = 0;
+export const color_transition_time = 30; // 30 ticks
+export const melt_transition_time = 10;
+
+export const tick = () => ticks += 1;
+export const set_color = index => {
+    index = index % colors.length;
+
+    prev_index = current_index;
+    current_index = index;
+    color_change_tick = ticks;
+}

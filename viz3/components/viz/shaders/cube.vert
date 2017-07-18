@@ -13,20 +13,33 @@ attribute vec2 uv;
 attribute vec2 uv2;
 */
 
-uniform int ticks;
+uniform vec4 _color;
+uniform vec4 _prev_color;
+
+uniform float ticks;
 uniform float melt;
+uniform float melt_off_tick;
+uniform float melt_transition_time;
+
 attribute float displacement;
 varying float _displacement;
-varying float _melt;
 
 varying vec3 _position;
 
 void main() {
 
 	_position = position;
-	_displacement = displacement;
-	_melt = melt;
-	vec3 perturbed = position + (normal * displacement);
+
+	float d = displacement;
+	if(melt_off_tick > 0.0 && ticks - melt_off_tick < melt_transition_time) {
+		d = displacement - displacement*(ticks - melt_off_tick)/melt_transition_time;
+	}
+	else if(melt == 0.0) {
+		d = 0.0;
+	}
+	_displacement = d;
+
+	vec3 perturbed = position + (normal * d);
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( perturbed, 1.0 );
 
 }

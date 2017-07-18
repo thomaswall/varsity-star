@@ -4,7 +4,7 @@ import simulate from './simulate.js'
 import particles from './particles.js'
 import * as cube from './cube'
 import OrbitControls from './controls.js';
-import constants from './constants.js';
+import * as constants from './constants.js';
 
 let scene, camera, renderer, control;
 let last_time = Date.now();
@@ -19,7 +19,6 @@ export default class Viz extends Component {
   }
 
   init = () => {
-
 
     renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -94,6 +93,10 @@ export default class Viz extends Component {
 
     if(key == 87) { // w for wireframe
       cube.toggle_wireframe();
+    }
+
+    if(key == 67) { // c for color
+      constants.set_color(constants.current_index + 1)
     }
     
     if(key == 78) {

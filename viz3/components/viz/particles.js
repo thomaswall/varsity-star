@@ -24,9 +24,8 @@ let color2;
 
 let create = (_renderer, _camera) => {
 	renderer = _renderer;
-
-	color1 = new THREE.Color(constants.colors[0]);
-	color2 = new THREE.Color(constants.colors[1]);
+	color1 = new THREE.Color(constants.colors[1].x, constants.colors[1].y, constants.colors[1].z);
+	color2 = new THREE.Color(constants.colors[0].x, constants.colors[0].y, constants.colors[0].z);
 
 	let mesh = {
         mesh: createTriangleMesh(_camera),

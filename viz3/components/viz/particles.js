@@ -24,8 +24,8 @@ let color2;
 
 let create = (_renderer, _camera) => {
 	renderer = _renderer;
-	color1 = new THREE.Color(constants.colors[1].x, constants.colors[1].y, constants.colors[1].z);
-	color2 = new THREE.Color(constants.colors[0].x, constants.colors[0].y, constants.colors[0].z);
+	color1 = constants.colors[1];
+	color2 = constants.colors[constants.current_index];
 
 	let mesh = {
         mesh: createTriangleMesh(_camera),
@@ -116,8 +116,8 @@ let createTriangleMesh = (_camera) => {
             {
                 texturePosition: { type: 't', value: undefined },
                 flipRatio: { type: 'f', value: 0 },
-                color1: { type: 'c', value: undefined },
-                color2: { type: 'c', value: undefined },
+                color1: { type: 'v4', value: undefined },
+                color2: { type: 'v4', value: undefined },
                 cameraMatrix: { type: 'm4', value: undefined }
             }
         ]),
@@ -169,6 +169,8 @@ let update = dt => {
     for(let i in meshes)
     {
         meshes[i].mesh.material.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
+        meshes[i].mesh.material.uniforms.color1.value = constants.colors[1];
+        meshes[i].mesh.material.uniforms.color2.value = constants.colors[constants.current_index];
         meshes[i].mesh.customDistanceMaterial.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
         meshes[i].mesh.motionMaterial.uniforms.texturePrevPosition.value = simulations[i].positionRenderTarget2.texture;
         if(meshes[i].mesh.material.uniforms.flipRatio ) {

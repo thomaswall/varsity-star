@@ -29,6 +29,10 @@ export let color_change_tick = 0;
 export const color_transition_time = 30; // 30 ticks
 export const melt_transition_time = 10;
 
+export let cube_x_rotation = 0.002;
+export let cube_y_rotation = 0.0;
+export let cube_z_rotation = 0.000;
+
 export const tick = () => ticks += 1;
 export const set_color = index => {
     index = index % colors.length;

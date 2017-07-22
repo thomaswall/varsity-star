@@ -31,7 +31,7 @@ export const create = (_renderer, _camera) => {
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
-		side: THREE.DoubleSide,
+		side: THREE.BackSide,
 		wireframe: false,
 		vertexColors: THREE.FaceColors,
 		wireframeLinewidth: 5,
@@ -83,8 +83,9 @@ export const toggle_melt = () => {
 export const update = dt => {
 
 	constants.tick();
-	mesh.rotation.x += 0.002;
-	mesh.rotation.z += .002;
+	mesh.rotation.x += constants.cube_x_rotation;
+	mesh.rotation.y += constants.cube_y_rotation;
+	mesh.rotation.z += constants.cube_z_rotation;
 
 	mesh.material.uniforms.ticks.value = constants.ticks;
 	mesh.material.uniforms.melt.value = melt ? 1 : 0;

@@ -35,13 +35,13 @@ void main() {
 		activeColor = norm_displacement * _color;
 	}
 
-	if(mod(floor(_uv.x * 10.0), 2.0) == 0.0 || mod(floor(_uv.y * 10.0), 2.0) == 0.0) {
+	if(mod(floor(_uv.x * 10.0), 2.0) == 0.0 || mod(floor(_uv.y * 10.0), 2.0) == 1.0) {
 		gl_FragColor = activeColor;
 	}
 	else {
 		gl_FragColor = norm_displacement * (ipl * vec4(_prev_color) + (1.0 - ipl) * _color);
+		//gl_FragColor = norm_displacement * vec4(_uv.x, _uv.y, 0.0, 1.0);
 	}
 
-	//gl_FragColor = vec4(_uv.x, _uv.y, 0.0, 1.0);
 
 }

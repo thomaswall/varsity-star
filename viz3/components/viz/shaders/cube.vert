@@ -23,12 +23,16 @@ uniform float melt_transition_time;
 
 attribute float displacement;
 varying float _displacement;
+varying vec2 _uv;
+//varying vec2 _uv2;
 
 varying vec3 _position;
 
 void main() {
 
 	_position = position;
+	_uv = uv;
+	//_uv2 = uv2;
 
 	float d = displacement;
 	if(melt_off_tick > 0.0 && ticks - melt_off_tick < melt_transition_time) {

@@ -12,11 +12,12 @@ uniform vec4 _prev_color;
 uniform float ticks;
 uniform float color_change_tick;
 uniform float color_transition_time;
+uniform int tex_mode;
+uniform sampler2D dat_tex;
 
 varying vec3 _position;
 varying float _displacement;
 varying vec2 _uv;
-//varying vec2 _uv2;
 
 void main() {
 
@@ -40,7 +41,10 @@ void main() {
 	}
 	else {
 		gl_FragColor = norm_displacement * (ipl * vec4(_prev_color) + (1.0 - ipl) * _color);
-		//gl_FragColor = norm_displacement * vec4(_uv.x, _uv.y, 0.0, 1.0);
+	}
+
+	if(tex_mode == 1) {
+		gl_FragColor = norm_displacement * texture2D(dat_tex, vec2(_uv.x, 1.0 - _uv.y));
 	}
 
 

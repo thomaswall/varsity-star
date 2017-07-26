@@ -98,6 +98,10 @@ export default class Viz extends Component {
     if(key == 67) { // c for color
       constants.set_color(constants.current_index + 1)
     }
+
+    if(key == 84) { // t for texture
+      cube.toggle_tex();
+    }
     
     if(key == 78) {
       simulate.create(renderer);

@@ -20,11 +20,11 @@ uniform float ticks;
 uniform float melt;
 uniform float melt_off_tick;
 uniform float melt_transition_time;
+uniform int wave_mode;
 
 attribute float displacement;
 varying float _displacement;
 varying vec2 _uv;
-//varying vec2 _uv2;
 
 varying vec3 _position;
 
@@ -32,7 +32,6 @@ void main() {
 
 	_position = position;
 	_uv = uv;
-	//_uv2 = uv2;
 
 	float d = displacement;
 	if(melt_off_tick > 0.0 && ticks - melt_off_tick < melt_transition_time) {
@@ -40,6 +39,10 @@ void main() {
 	}
 	else if(melt == 0.0) {
 		d = 0.0;
+	}
+
+	if(wave_mode == 1) {
+		vec2 center = vec2(0.5, 0.5);
 	}
 	_displacement = d;
 

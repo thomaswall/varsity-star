@@ -1,11 +1,14 @@
 import THREE from 'three';
 import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
+import jacharyYellow from './jachary-yellow.jpg'
 import * as constants from './constants';
 
 let renderer;
 let mesh;
 let melt = false;
+let tex_mode = false;
+let wave_mode = false;
 
 const amplitude = 30;
 
@@ -28,6 +31,13 @@ export const create = (_renderer, _camera) => {
 
 	geometry.addAttribute('displacement', new THREE.BufferAttribute(displacement, 1));
 
+	const yellow_tex_image = new Image();
+	yellow_tex_image.src = jacharyYellow;
+
+	const yellow_tex = new THREE.Texture();
+	yellow_tex.image = yellow_tex_image;
+	yellow_tex_image.onload = () => yellow_tex.needsUpdate = true;
+
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
@@ -40,11 +50,17 @@ export const create = (_renderer, _camera) => {
 			boomTick: { value: -1 },
 			melt: { value: 0 },
 			melt_off_tick: { value: -1 },
+			tex_mode: { value: 0 },
+			wave_mode: { value: 0 },
 			melt_transition_time: { value: constants.melt_transition_time },
 			color_change_tick: { value: constants.color_change_tick },
 			color_transition_time: { value: constants.color_transition_time },
 			_color: new THREE.Uniform(constants.colors[constants.current_index]),
-			_prev_color: new THREE.Uniform(constants.colors[constants.prev_index])
+			_prev_color: new THREE.Uniform(constants.colors[constants.prev_index]),
+			dat_tex: {
+				type: "t",
+				value: yellow_tex
+			}
 		}
 	})
 
@@ -78,6 +94,16 @@ export const toggle_melt = () => {
 
 	melt = !melt;
 	mesh.geometry.attributes.displacement.needsUpdate = true;
+}
+
+export const toggle_tex = () => {
+	tex_mode = !tex_mode;
+	mesh.material.uniforms.tex_mode.value = 1.0 - mesh.material.uniforms.tex_mode.value;
+}
+
+export const toggle_wave = () => {
+	wave_mode = !wave_mode;
+	mesh.material.uniforms.wave_mode.value = 1.0 - mesh.material.uniforms.wave_mode.value;
 }
 
 export const update = dt => {

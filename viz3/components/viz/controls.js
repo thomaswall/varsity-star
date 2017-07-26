@@ -125,8 +125,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 
     // so camera.up is the orbit axis
 
-    var quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
-    var quatInverse = quat.clone().inverse();
+    this.quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
+    var quatInverse = this.quat.clone().inverse();
 
     // events
 
@@ -278,7 +278,7 @@ THREE.OrbitControls = function ( object, domElement ) {
         offset.copy( position ).sub( this.target );
 
         // rotate offset to "y-axis-is-up" space
-        offset.applyQuaternion( quat );
+        offset.applyQuaternion( this.quat );
 
         // angle from z-axis around y-axis
 

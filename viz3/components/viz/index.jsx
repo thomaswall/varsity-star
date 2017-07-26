@@ -9,6 +9,8 @@ import * as constants from './constants.js';
 let scene, camera, renderer, control;
 let last_time = Date.now();
 let dt;
+let spin = false;
+let last_spin;
 
 export default class Viz extends Component {
 
@@ -63,7 +65,10 @@ export default class Viz extends Component {
 }
 
   animate = () => {
-    dt = Date.now() - last_time;
+    let time = Date.now();
+    dt = time - last_time;
+    if(spin)
+      camera.up = new THREE.Vector3(Math.cos(time * 0.001), Math.sin(time * 0.001), 0);
     last_time = Date.now();
 
     renderer.setClearColor("#343434");
@@ -71,6 +76,7 @@ export default class Viz extends Component {
     simulate.update(dt);
     particles.update(dt);
     cube.update(dt);
+    control.update();
 
     renderer.render( scene, camera );
     requestAnimationFrame( this.animate );
@@ -127,6 +133,14 @@ export default class Viz extends Component {
       constants.phase = 0;
     if(key == 50)
       constants.phase = 1;
+    
+    if(key == 82)
+      control.rotateLeft(-Math.PI / 4);
+    
+    if(key == 83) {
+      last_spin = camera.up;
+      spin = !spin;
+    }
   }
 
 

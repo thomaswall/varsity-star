@@ -199,7 +199,7 @@ let update = dt => {
 			simulation.followPoint.set(
 				Math.cos(sinceRestart + simulation.offset) * 200,
 				Math.sin(sinceRestart + simulation.offset) * 200,
-				0
+				Math.sin(sinceRestart + simulation.offset) * 50
 			);
 			simulation.positionShader.uniforms.mouse3d.value.lerp(simulation.followPoint, 0.2);
 		}

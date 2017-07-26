@@ -42,7 +42,10 @@ void main() {
 	}
 
 	if(wave_mode == 1) {
-		vec2 center = vec2(0.5, 0.5);
+		vec2 center = vec2(5.0, 5.0);
+		float dist = distance(center, _uv * 10.0) * 2.0;
+
+		d += 100.0 * sin(dist + ticks * 0.1);
 	}
 	_displacement = d;
 

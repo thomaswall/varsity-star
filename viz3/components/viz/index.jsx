@@ -114,6 +114,10 @@ export default class Viz extends Component {
     if(key == 84) { // t for texture
       cube.toggle_tex();
     }
+
+    if(key == 85) { // u cuz it kinda look like a wave?
+      cube.toggle_wave();
+    }
     
     if(key == 78) {
       simulate.create(renderer);
@@ -137,6 +141,11 @@ export default class Viz extends Component {
     } 
     if(key == 40) { // down arrow
       constants.cube_x_rotation += 0.001;
+    }
+
+    if(key == 32) { // space for pause
+      constants.cube_x_rotation = 0;
+      constants.cube_y_rotation = 0;
     }
 
     if(key == 49)

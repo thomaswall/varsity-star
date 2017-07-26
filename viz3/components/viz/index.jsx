@@ -10,7 +10,8 @@ let scene, camera, renderer, control;
 let last_time = Date.now();
 let dt;
 let spin = false;
-let last_spin;
+let last_spin = Math.PI / 2;
+let last_spin_time = 0;
 
 export default class Viz extends Component {
 
@@ -67,8 +68,13 @@ export default class Viz extends Component {
   animate = () => {
     let time = Date.now();
     dt = time - last_time;
-    if(spin)
-      camera.up = new THREE.Vector3(Math.cos(time * 0.001), Math.sin(time * 0.001), 0);
+    if(spin) {
+      last_spin += dt * 0.001;
+      camera.up = new THREE.Vector3(
+         Math.cos(last_spin), 
+         Math.sin(last_spin), 
+        0);
+    }
     last_time = Date.now();
 
     renderer.setClearColor("#343434");
@@ -142,7 +148,9 @@ export default class Viz extends Component {
       control.rotateLeft(-Math.PI / 4);
     
     if(key == 83) {
-      last_spin = camera.up;
+      if(!spin) {
+        last_spin_time = Date.now();
+      }
       spin = !spin;
     }
   }

@@ -24,8 +24,8 @@ let color2;
 
 let create = (_renderer, _camera) => {
 	renderer = _renderer;
-	color1 = constants.colors[1];
-	color2 = constants.colors[constants.current_index];
+	color1 = constants.ballColors[1];
+	color2 = constants.ballColors[constants.current_index];
 
 	let mesh = {
         mesh: createTriangleMesh(_camera),
@@ -169,8 +169,8 @@ let update = dt => {
     for(let i in meshes)
     {
         meshes[i].mesh.material.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
-        meshes[i].mesh.material.uniforms.color1.value = constants.colors[1];
-        meshes[i].mesh.material.uniforms.color2.value = constants.colors[constants.current_index];
+        meshes[i].mesh.material.uniforms.color1.value = constants.ballColors[1];
+        meshes[i].mesh.material.uniforms.color2.value = constants.ballColors[constants.current_index];
         meshes[i].mesh.customDistanceMaterial.uniforms.texturePosition.value = simulations[i].positionRenderTarget.texture;
         meshes[i].mesh.motionMaterial.uniforms.texturePrevPosition.value = simulations[i].positionRenderTarget2.texture;
         if(meshes[i].mesh.material.uniforms.flipRatio ) {

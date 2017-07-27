@@ -23,6 +23,10 @@ uniform float melt_transition_time;
 uniform int wave_mode;
 uniform float wave_tick;
 
+const float PI = 3.1415926535897932384626433832795;
+const float PI_2 = 1.57079632679489661923;
+const float PI_4 = 0.785398163397448309616;
+
 attribute float displacement;
 varying float _displacement;
 varying vec2 _uv;
@@ -58,7 +62,8 @@ void main() {
 		if((dist/7.1) <= wt/wave_propagation_ticks) {
 
 			// need inside of eq to start at 0 and then increase by wt.
-			d += -100.0 * cos((ticks - wt_o) * 0.1 + clamp(wt/wave_propagation_ticks, 0.0, 4.0) * dist );
+			d += -100.0 * cos((ticks - wt_o) * 0.1 + clamp(wt/wave_propagation_ticks, 0.0, PI/2.0) * dist );
+			//d += -100.0 * cos((ticks - wt_o) * (ticks - wt_o) * 0.1);
 			//d += -100.0 * cos(dist + wt * 0.1);
 		}
 

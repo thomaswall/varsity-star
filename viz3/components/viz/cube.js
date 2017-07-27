@@ -2,6 +2,7 @@ import THREE from 'three';
 import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
 import jacharyYellow from './jachary-yellow.jpg'
+import patternTricolor from './pattern-tricolor.jpg'
 import * as constants from './constants';
 
 let renderer;
@@ -16,6 +17,8 @@ export let container = new THREE.Object3D();
 
 let displacement;
 let noise;
+
+let textures = [];
 
 export const create = (_renderer, _camera) => {
 
@@ -38,6 +41,18 @@ export const create = (_renderer, _camera) => {
 	yellow_tex.image = yellow_tex_image;
 	yellow_tex_image.onload = () => yellow_tex.needsUpdate = true;
 
+	textures.push(yellow_tex);
+
+	const pattern_tricolor_img = new Image();
+	pattern_tricolor_img.src = patternTricolor;
+	const pattern_tricolor_tex = new THREE.Texture();
+	pattern_tricolor_tex.image = pattern_tricolor_img;
+	pattern_tricolor_img.onload = () => pattern_tricolor_tex.needsUpdate = true;
+
+	/*
+import patternTricolor from './pattern-tricolor.png'
+import trippySevencolor from './trippy-sevencolor.jpg'
+*/
 	const material = new THREE.ShaderMaterial({
 		vertexShader: cubevert,
 		fragmentShader: cubefrag,
@@ -60,8 +75,9 @@ export const create = (_renderer, _camera) => {
 			_prev_color: new THREE.Uniform(constants.colors[constants.prev_index]),
 			dat_tex: {
 				type: "t",
-				value: yellow_tex
-			}
+				value: pattern_tricolor_tex
+				//value: yellow_tex
+			},
 		}
 	})
 

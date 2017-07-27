@@ -44,7 +44,18 @@ void main() {
 	}
 
 	if(tex_mode == 1) {
-		gl_FragColor = norm_displacement * texture2D(dat_tex, vec2(_uv.x, 1.0 - _uv.y));
+		vec4 raw_color = texture2D(dat_tex, vec2(_uv.x, 1.0 - _uv.y));
+
+/*
+		vec4 nc = normalize(raw_color);
+		if(nc.r > 0.6) {
+			raw_color = _color;
+		}
+		if(nc.g > 0.5) {
+			raw_color = _prev_color;
+		}
+		*/
+		gl_FragColor = norm_displacement * raw_color;
 	}
 
 

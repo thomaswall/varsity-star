@@ -45,10 +45,13 @@ export let cube_x_rotation = 0.002;
 export let cube_y_rotation = 0.0;
 export let cube_z_rotation = 0.000;
 
+export let color_history = [];
 export const tick = () => ticks += 1;
 export const set_color = index => {
     index = index % colors.length;
 
+    color_history.push(colors[current_index]);
+    color_history = color_history.slice(0, colors.length);
     prev_index = current_index;
     current_index = index;
     color_change_tick = ticks;

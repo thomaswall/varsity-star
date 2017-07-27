@@ -52,6 +52,7 @@ export const create = (_renderer, _camera) => {
 			melt_off_tick: { value: -1 },
 			tex_mode: { value: 0 },
 			wave_mode: { value: 0 },
+			wave_tick: { value: -1 },
 			melt_transition_time: { value: constants.melt_transition_time },
 			color_change_tick: { value: constants.color_change_tick },
 			color_transition_time: { value: constants.color_transition_time },
@@ -104,6 +105,7 @@ export const toggle_tex = () => {
 export const toggle_wave = () => {
 	wave_mode = !wave_mode;
 	mesh.material.uniforms.wave_mode.value = 1.0 - mesh.material.uniforms.wave_mode.value;
+	mesh.material.uniforms.wave_tick.value = constants.ticks;
 }
 
 export const update = dt => {

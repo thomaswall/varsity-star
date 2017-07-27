@@ -21,6 +21,7 @@ uniform float melt;
 uniform float melt_off_tick;
 uniform float melt_transition_time;
 uniform int wave_mode;
+uniform float wave_tick;
 
 attribute float displacement;
 varying float _displacement;
@@ -41,11 +42,26 @@ void main() {
 		d = 0.0;
 	}
 
+	float wave_propagation_ticks = 10.0;
 	if(wave_mode == 1) {
 		vec2 center = vec2(5.0, 5.0);
-		float dist = distance(center, _uv * 10.0) * 2.0;
+		float dist = distance(center, _uv * 10.0);
+		float wt = ticks - wave_tick;
+		float wt_o = dist / 7.1 * wave_propagation_ticks + wave_tick;
+		// max distance is sqrt(5^2 + 5^2) =~ 7.1;
 
-		d += 100.0 * sin(dist + ticks * 0.1);
+		float modifier = 0.0;
+		if(wt/wave_propagation_ticks >= 1.0) {
+			modifier = 1.0;
+		}
+
+		if((dist/7.1) <= wt/wave_propagation_ticks) {
+
+			// need inside of eq to start at 0 and then increase by wt.
+			d += -100.0 * cos((ticks - wt_o) * 0.1 + clamp(wt/wave_propagation_ticks, 0.0, 4.0) * dist );
+			//d += -100.0 * cos(dist + wt * 0.1);
+		}
+
 	}
 	_displacement = d;
 

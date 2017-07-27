@@ -48,7 +48,7 @@ void main() {
 
 		vec4 nc = normalize(raw_color);
 		if(raw_color.r > 0.3 && raw_color.g < 0.2) {
-			raw_color = _color;
+			raw_color = activeColor; 
 		}
 		else if(raw_color.g > 0.3 && raw_color.r < 0.3) {
 			raw_color = _prev_color;

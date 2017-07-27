@@ -131,21 +131,22 @@ export default class Viz extends Component {
     }
 
     if(key == 37) { // left arrow
-      constants.cube_y_rotation -= 0.001;
+      constants.set_cube_y_rotation(constants.cube_y_rotation - 0.001);
     }
     if(key == 38) { // up arrow
-      constants.cube_x_rotation -= 0.001;
+      constants.set_cube_x_rotation(constants.cube_x_rotation - 0.001);
     }
     if(key == 39) { // right arrow
-      constants.cube_y_rotation += 0.001;
+      constants.set_cube_y_rotation(constants.cube_y_rotation + 0.001);
     } 
     if(key == 40) { // down arrow
-      constants.cube_x_rotation += 0.001;
+      constants.set_cube_x_rotation(constants.cube_x_rotation - 0.001);
     }
 
     if(key == 32) { // space for pause
-      constants.cube_x_rotation = 0;
-      constants.cube_y_rotation = 0;
+      constants.pause_rotation();
+      //constants.cube_x_rotation = 0;
+      //constants.cube_y_rotation = 0;
     }
 
     if(key == 49)

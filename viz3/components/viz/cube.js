@@ -66,8 +66,10 @@ import trippySevencolor from './trippy-sevencolor.jpg'
 			melt: { value: 0 },
 			melt_off_tick: { value: -1 },
 			tex_mode: { value: 0 },
+			tex_tick: { value: -1 },
 			wave_mode: { value: 0 },
 			wave_tick: { value: -1 },
+			wave_off_tick: { value: -1 },
 			melt_transition_time: { value: constants.melt_transition_time },
 			color_change_tick: { value: constants.color_change_tick },
 			color_transition_time: { value: constants.color_transition_time },
@@ -119,9 +121,16 @@ export const toggle_tex = () => {
 }
 
 export const toggle_wave = () => {
+
+	if(wave_mode) {
+		mesh.material.uniforms.wave_off_tick.value = constants.ticks;
+		console.log('set uniform', constants.ticks);
+	} else {
+		mesh.material.uniforms.wave_tick.value = constants.ticks;
+	}
+
 	wave_mode = !wave_mode;
 	mesh.material.uniforms.wave_mode.value = 1.0 - mesh.material.uniforms.wave_mode.value;
-	mesh.material.uniforms.wave_tick.value = constants.ticks;
 }
 
 export const update = dt => {

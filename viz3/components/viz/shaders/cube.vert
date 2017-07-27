@@ -22,6 +22,7 @@ uniform float melt_off_tick;
 uniform float melt_transition_time;
 uniform int wave_mode;
 uniform float wave_tick;
+uniform float wave_off_tick;
 
 const float PI = 3.1415926535897932384626433832795;
 const float PI_2 = 1.57079632679489661923;
@@ -45,8 +46,42 @@ void main() {
 	else if(melt == 0.0) {
 		d = 0.0;
 	}
+	// (wave_off_tick > 0.0 && ticks - wave_off_tick < wave_propagation_ticks)
 
-	float wave_propagation_ticks = 10.0;
+	const float wave_propagation_ticks = 10.0;
+	const float wave_end_ticks = 120.0;
+
+	if(wave_mode == 0 && (wave_off_tick > 0.0 && ticks - wave_off_tick < wave_end_ticks)) {
+		vec2 center = vec2(5.0, 5.0);
+		float dist = distance(center, _uv * 10.0);
+		float wt = ticks - wave_tick;
+		float wt_o = dist / 7.1 * wave_propagation_ticks + wave_tick;
+		float wt_off = ticks - wave_off_tick;
+
+		bool zeroed = false;
+
+		bool prev_pos = true;
+		for(float i = 0.0; i < wave_end_ticks; i++) {
+			// check how perturbed it is
+			// if 0, set displacement to 0 and break
+			if(i < wt_off) {
+				float p_disp = -100.0 * cos((wave_off_tick + i - wt_o) * 0.1 + clamp(wt/wave_propagation_ticks, 0.0, PI/2.0) * dist );
+
+				if(abs(p_disp) < 5.0 && !prev_pos) {
+					d = 0.0;
+					zeroed = true;
+					break;
+				}
+				prev_pos = p_disp > 0.0;
+			}
+		}
+
+		if(!zeroed) {
+			d += -100.0 * cos((ticks - wt_o) * 0.1 + clamp(wt/wave_propagation_ticks, 0.0, PI/2.0) * dist );
+		}
+
+	}
+
 	if(wave_mode == 1) {
 		vec2 center = vec2(5.0, 5.0);
 		float dist = distance(center, _uv * 10.0);

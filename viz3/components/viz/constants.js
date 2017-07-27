@@ -41,12 +41,44 @@ export let color_change_tick = 0;
 export const color_transition_time = 30; // 30 ticks
 export const melt_transition_time = 10;
 
-export let cube_x_rotation = 0.002;
+export let cube_x_rotation = 0.0;
 export let cube_y_rotation = 0.0;
 export let cube_z_rotation = 0.000;
 
+export const set_cube_x_rotation = r => cube_x_rotation = r;
+export const set_cube_y_rotation = r => cube_y_rotation = r;
+export const set_cube_z_rotation = r => cube_z_rotation = r;
+
+let x_rot_dec = 0.0;
+let y_rot_dec = 0.0;
+let z_rot_dec = 0.0;
+
+let rotation_stop_tick = -1;
+const rotation_stop_time = 20.0;
+export const pause_rotation = () => { 
+    console.log(cube_x_rotation, cube_y_rotation, cube_z_rotation, rotation_stop_time);
+    x_rot_dec = cube_x_rotation/rotation_stop_time;
+    y_rot_dec = cube_y_rotation/rotation_stop_time;
+    z_rot_dec = cube_z_rotation/rotation_stop_time;
+
+    rotation_stop_tick = ticks; 
+}
+
 export let color_history = [];
-export const tick = () => ticks += 1;
+
+export const tick = () => {
+    ticks += 1;
+
+    if(rotation_stop_tick > 0 && ticks - rotation_stop_tick <= rotation_stop_time) {
+        cube_x_rotation -= x_rot_dec;
+        cube_y_rotation -= y_rot_dec;
+        cube_z_rotation -= z_rot_dec;
+    }
+    cube_x_rotation = Math.abs(cube_x_rotation) < 0.0004 ? 0 : cube_x_rotation;
+    cube_y_rotation = Math.abs(cube_y_rotation) < 0.0004 ? 0 : cube_y_rotation;
+    cube_z_rotation = Math.abs(cube_z_rotation) < 0.0004 ? 0 : cube_z_rotation;
+}
+
 export const set_color = index => {
     index = index % colors.length;
 

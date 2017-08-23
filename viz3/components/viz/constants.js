@@ -20,15 +20,15 @@ export let phase = 0;
 export const colors = [
     new THREE.Vector4(143.0/255.0, 148/255.0, 145/255.0, 1),
     new THREE.Vector4(0.0, 0.0, 0.0, 1.0),
-    new THREE.Vector4(4/255.0, 42/255.0, 43/255.0, 1),
-    new THREE.Vector4(1/255.0, 25/255.0, 54/255.0, 1),
+    new THREE.Vector4(50.0/255.0, 159.0/255.0, 91.0/255.0, 1),
+    new THREE.Vector4(61.0/255.0, 82.0/255.0, 213.0/255.0, 1),
     new THREE.Vector4(75/255.0, 83/255.0, 88/255.0, 1),
-    new THREE.Vector4(45/255.0, 3/255.0, 32/255.0, 1),
+    new THREE.Vector4(255.0/255.0, 90.0/255.0, 95.0/255.0, 1),
 ]
 
 export const ballColors = [
     new THREE.Vector4(166.0/255.0, 234/255.0, 228/255.0, 1),
-    new THREE.Vector4(1.0, 1.0, 1.0, 1.0),
+    new THREE.Vector4(189.0/255.0, 173.0/255.0, 234.0/255.0, 1.0),
     new THREE.Vector4(71/255.0, 229/255.0, 216/255.0, 1),
     new THREE.Vector4(198/255.0, 158/255.0, 147/255.0, 1),
     new THREE.Vector4(170/255.0, 105/255.0, 87/255.0, 1),

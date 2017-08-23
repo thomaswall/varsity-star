@@ -53,7 +53,7 @@ void main() {
 
 	if(wave_mode == 0 && (wave_off_tick > 0.0 && ticks - wave_off_tick < wave_end_ticks)) {
 		vec2 center = vec2(5.0, 5.0);
-		float dist = distance(center, _uv * 10.0);
+		float dist = distance(center, uv * 10.0);
 		float wt = ticks - wave_tick;
 		float wt_o = dist / 7.1 * wave_propagation_ticks + wave_tick;
 		float wt_off = ticks - wave_off_tick;
@@ -84,7 +84,7 @@ void main() {
 
 	if(wave_mode == 1) {
 		vec2 center = vec2(5.0, 5.0);
-		float dist = distance(center, _uv * 10.0);
+		float dist = distance(center, uv * 10.0);
 		float wt = ticks - wave_tick;
 		float wt_o = dist / 7.1 * wave_propagation_ticks + wave_tick;
 		// max distance is sqrt(5^2 + 5^2) =~ 7.1;

@@ -3,6 +3,7 @@ import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
 import jacharyYellow from './jachary-yellow.jpg'
 import patternTricolor from './pattern-tricolor.jpg'
+import meeseeks from './meseeks.jpg'
 import * as constants from './constants';
 
 let renderer;
@@ -49,6 +50,12 @@ export const create = (_renderer, _camera) => {
 	pattern_tricolor_tex.image = pattern_tricolor_img;
 	pattern_tricolor_img.onload = () => pattern_tricolor_tex.needsUpdate = true;
 
+	const ms_img = new Image();
+	ms_img.src = meeseeks;
+	const ms_tex = new THREE.Texture();
+	ms_tex.image = ms_img;
+	ms_img.onload = () => ms_tex.needsUpdate = true;
+
 	/*
 import patternTricolor from './pattern-tricolor.png'
 import trippySevencolor from './trippy-sevencolor.jpg'
@@ -80,6 +87,10 @@ import trippySevencolor from './trippy-sevencolor.jpg'
 				value: pattern_tricolor_tex
 				//value: yellow_tex
 			},
+			box_tex: {
+				type: "t",
+				value: ms_tex
+			}
 		}
 	})
 

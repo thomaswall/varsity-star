@@ -140,7 +140,7 @@ export default class Viz extends Component {
       constants.set_cube_y_rotation(constants.cube_y_rotation + 0.001);
     } 
     if(key == 40) { // down arrow
-      constants.set_cube_x_rotation(constants.cube_x_rotation - 0.001);
+      constants.set_cube_x_rotation(constants.cube_x_rotation + 0.001);
     }
 
     if(key == 32) { // space for pause

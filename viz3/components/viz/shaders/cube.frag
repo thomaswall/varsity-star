@@ -14,6 +14,7 @@ uniform float color_change_tick;
 uniform float color_transition_time;
 uniform int tex_mode;
 uniform sampler2D dat_tex;
+uniform sampler2D box_tex;
 
 varying vec3 _position;
 varying float _displacement;
@@ -40,7 +41,15 @@ void main() {
 		gl_FragColor = activeColor;
 	}
 	else {
-		gl_FragColor = norm_displacement * (ipl * vec4(_prev_color) + (1.0 - ipl) * _color);
+		//gl_FragColor = norm_displacement * (ipl * vec4(_prev_color) + (1.0 - ipl) * _color);
+		
+		float m_x = (_uv.x * 10.0) - floor(_uv.x * 10.0);
+		float m_y = (_uv.y * 10.0) - floor(_uv.y * 10.0);
+		vec4 cartoon = texture2D(box_tex, vec2(m_x, m_y));
+		if(cartoon.r + cartoon.g + cartoon.b >= 2.90) {
+			cartoon = activeColor;
+		}
+		gl_FragColor = cartoon;
 	}
 
 	if(tex_mode == 1) {

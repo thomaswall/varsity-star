@@ -45,23 +45,33 @@ void main() {
 		
 		float m_x = (_uv.x * 10.0) - floor(_uv.x * 10.0);
 		float m_y = (_uv.y * 10.0) - floor(_uv.y * 10.0);
+        
 		vec4 cartoon = texture2D(box_tex, vec2(m_x, m_y));
-		if(cartoon.r + cartoon.g + cartoon.b >= 2.90) {
+		if(cartoon.r + cartoon.g + cartoon.b >= 2.0) {
 			cartoon = activeColor;
 		}
+		else {
+			cartoon = _prev_color;
+		}
 		gl_FragColor = cartoon;
+		
 	}
 
 	if(tex_mode == 1) {
 		vec4 raw_color = texture2D(dat_tex, vec2(_uv.x, 1.0 - _uv.y));
 
 		vec4 nc = normalize(raw_color);
-		if(raw_color.r > 0.3 && raw_color.g < 0.2) {
-			raw_color = activeColor; 
+		float bw_color = (raw_color.r + raw_color.g + raw_color.b) / 3.0;
+        
+		raw_color = bw_color * activeColor + (1.0 - bw_color) * _prev_color;
+		/*
+		if(bw_color >= 2.0/3.0) {
+			raw_color = activeColor;
 		}
-		else if(raw_color.g > 0.3 && raw_color.r < 0.3) {
+		else {
 			raw_color = _prev_color;
 		}
+		*/
 
 		gl_FragColor = norm_displacement * raw_color;
 	}

@@ -1,6 +1,6 @@
 import THREE from 'three';
 
-export let amount = 512;
+export let amount = 256;
 export let particleRestart = 0;
 export let timeStart = Date.now();
 export let ticks = 0;
@@ -24,6 +24,9 @@ export const colors = [
     new THREE.Vector4(61.0/255.0, 82.0/255.0, 213.0/255.0, 1),
     new THREE.Vector4(75/255.0, 83/255.0, 88/255.0, 1),
     new THREE.Vector4(255.0/255.0, 90.0/255.0, 95.0/255.0, 1),
+    new THREE.Vector4(248/255, 99/255, 156/255, 1),
+    new THREE.Vector4(231/255, 139/255, 41/255, 1),
+    new THREE.Vector4(249/255, 255/255, 52/255, 1),
 ]
 
 export const ballColors = [
@@ -33,6 +36,9 @@ export const ballColors = [
     new THREE.Vector4(198/255.0, 158/255.0, 147/255.0, 1),
     new THREE.Vector4(170/255.0, 105/255.0, 87/255.0, 1),
     new THREE.Vector4(0/255.0, 0/255.0, 0/255.0, 1),
+    new THREE.Vector4(255/255.0, 255/255.0, 0/255.0, 1),
+    new THREE.Vector4(255/255.0, 255/255.0, 0/255.0, 1),
+    new THREE.Vector4(255/255.0, 255/255.0, 0/255.0, 1),
 ]
 
 export let current_index = 0;

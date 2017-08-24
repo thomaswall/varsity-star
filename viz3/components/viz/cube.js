@@ -3,13 +3,24 @@ import cubevert from './shaders/cube.vert'
 import cubefrag from './shaders/cube.frag'
 import jacharyYellow from './jachary-yellow.jpg'
 import patternTricolor from './pattern-tricolor.jpg'
+
+import bwPattern from './bw-pattern.jpg'
+import bwLinks from './links.jpg'
+import bwSpiral from './bw-spiral.jpg'
+import bwSquared from './bw-squared.jpg'
+import bwWavy from './wavynoise1.jpg'
+import bwNoise from './noise.jpg'
+import bwFlower from './flowery.jpg'
+import bwWavyPaint from './wavypaint.png'
+import bwWaveetest from './waveetest.jpg'
+
 import meeseeks from './meseeks.jpg'
 import * as constants from './constants';
 
 let renderer;
 let mesh;
 let melt = false;
-let tex_mode = false;
+let tex_mode = true;
 let wave_mode = false;
 
 const amplitude = 30;
@@ -20,6 +31,8 @@ let displacement;
 let noise;
 
 let textures = [];
+let current_tex;
+let current_tex_index = 0;
 
 export const create = (_renderer, _camera) => {
 
@@ -42,19 +55,71 @@ export const create = (_renderer, _camera) => {
 	yellow_tex.image = yellow_tex_image;
 	yellow_tex_image.onload = () => yellow_tex.needsUpdate = true;
 
-	textures.push(yellow_tex);
+	//textures.push(yellow_tex);
 
 	const pattern_tricolor_img = new Image();
-	pattern_tricolor_img.src = patternTricolor;
+	//pattern_tricolor_img.src = patternTricolor;
+	pattern_tricolor_img.src = bwPattern;
 	const pattern_tricolor_tex = new THREE.Texture();
 	pattern_tricolor_tex.image = pattern_tricolor_img;
 	pattern_tricolor_img.onload = () => pattern_tricolor_tex.needsUpdate = true;
 
+	textures.push(pattern_tricolor_tex);
+
 	const ms_img = new Image();
-	ms_img.src = meeseeks;
+	ms_img.src = bwSquared;
 	const ms_tex = new THREE.Texture();
 	ms_tex.image = ms_img;
 	ms_img.onload = () => ms_tex.needsUpdate = true;
+
+	textures.push(ms_tex);
+
+	const spiralimg = new Image();
+	spiralimg.src = bwFlower;
+	const spiraltex = new THREE.Texture();
+	spiraltex.image = spiralimg;
+	spiralimg.onload = () => spiraltex.needsUpdate = true;
+
+	textures.push(spiraltex);
+
+	const noiseimg = new Image();
+	noiseimg.src = bwNoise;
+	const noisetex = new THREE.Texture();
+	noisetex.image = noiseimg;
+	noiseimg.onload = () => noisetex.needsUpdate = true;
+
+	textures.push(noisetex)
+
+	const linksimg = new Image();
+	linksimg.src = bwLinks;
+	const linkstex = new THREE.Texture();
+	linkstex.image = linksimg;
+	linksimg.onload = () => linkstex.needsUpdate = true;
+	textures.push(linkstex)
+
+	const bwwavyimg = new Image();
+	bwwavyimg.src = bwWavy;
+	const bwwavytex = new THREE.Texture();
+	bwwavytex.image = bwwavyimg;
+	bwwavyimg.onload = () => bwwavytex.needsUpdate = true;
+	textures.push(bwwavytex)
+
+	const bwwavyimg_b = new Image();
+	bwwavyimg_b.src = bwWaveetest;
+	const bwwavytex_b = new THREE.Texture();
+	bwwavytex_b.image = bwwavyimg_b;
+	bwwavyimg_b.onload = () => bwwavytex_b.needsUpdate = true;
+	textures.push(bwwavytex_b)
+
+	const bwwavyimg_c = new Image();
+	bwwavyimg_c.src = bwWavyPaint;
+	const bwwavytex_c = new THREE.Texture();
+	bwwavytex_c.image = bwwavyimg_c;
+	bwwavyimg_c.onload = () => bwwavytex_c.needsUpdate = true;
+	textures.push(bwwavytex_c)
+
+
+	current_tex = textures[0];
 
 	/*
 import patternTricolor from './pattern-tricolor.png'
@@ -66,13 +131,13 @@ import trippySevencolor from './trippy-sevencolor.jpg'
 		side: THREE.BackSide,
 		wireframe: false,
 		vertexColors: THREE.FaceColors,
-		wireframeLinewidth: 5,
+		wireframeLinewidth: 8,
 		uniforms: {
 			ticks: { value: constants.ticks },
 			boomTick: { value: -1 },
 			melt: { value: 0 },
 			melt_off_tick: { value: -1 },
-			tex_mode: { value: 0 },
+			tex_mode: { value: 1 },
 			tex_tick: { value: -1 },
 			wave_mode: { value: 0 },
 			wave_tick: { value: -1 },
@@ -85,7 +150,10 @@ import trippySevencolor from './trippy-sevencolor.jpg'
 			dat_tex: {
 				type: "t",
 				value: pattern_tricolor_tex
-				//value: yellow_tex
+			},
+			prev_tex: {
+				type: "t",
+				value: textures[0]
 			},
 			box_tex: {
 				type: "t",
@@ -127,8 +195,14 @@ export const toggle_melt = () => {
 }
 
 export const toggle_tex = () => {
-	tex_mode = !tex_mode;
-	mesh.material.uniforms.tex_mode.value = 1.0 - mesh.material.uniforms.tex_mode.value;
+    tex_mode = true;
+	current_tex_index = (current_tex_index + 1) % textures.length;
+	current_tex = textures[current_tex_index];
+	mesh.material.uniforms.dat_tex.value = textures[current_tex_index];
+
+	//tex_mode = !tex_mode;
+	//mesh.material.uniforms.tex_mode.value = 1.0 - mesh.material.uniforms.tex_mode.value;
+
 }
 
 export const toggle_wave = () => {
